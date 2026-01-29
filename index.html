@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的工具导航</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+                🚀 我的工作台
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Section: 本地工具 -->
+        <div class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 border-l-4 border-blue-500 pl-3">本地工具</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Card: Car Calculator -->
+                <a href="car_calculator.html" class="card block bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:border-blue-300 group">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 bg-blue-50 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600">购车成本计算器</h3>
+                            <p class="text-sm text-gray-500 mt-1">全方位计算油车/电车购车及后续养车成本</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Placeholder for future local tool -->
+                <div class="card bg-gray-50 rounded-xl border border-dashed border-gray-300 p-6 flex flex-col justify-center items-center text-center opacity-70">
+                    <div class="p-3 bg-gray-100 rounded-full mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                    </div>
+                    <span class="text-sm font-medium text-gray-500">更多工具敬请期待...</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section: 常用网站 (Example) -->
+        <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 border-l-4 border-purple-500 pl-3">常用网站</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                
+                <!-- Example Link 1 -->
+                <a href="https://www.google.com" target="_blank" class="card bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:border-purple-300 flex items-center space-x-3">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                    <span class="font-medium text-gray-700">Google</span>
+                </a>
+
+                <!-- Example Link 2 -->
+                <a href="https://github.com" target="_blank" class="card bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:border-purple-300 flex items-center space-x-3">
+                    <img src="https://github.com/favicon.ico" alt="GitHub" class="w-5 h-5">
+                    <span class="font-medium text-gray-700">GitHub</span>
+                </a>
+
+                <!-- Add more links here -->
+                 
+                 <!-- <a href="#" class="card bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 flex justify-center items-center text-gray-400 text-sm hover:bg-gray-100">
+                    + 添加链接
+                </a> -->
+
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+            &copy; Lowlife123
+        </div>
+    </footer>
+
+</body>
+</html>
