@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购车用车成本计算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .input-group { margin-bottom: 1rem; }
+        .input-label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.25rem; }
+        .input-field { width: 100%; padding: 0.5rem; border: 1px solid #D1D5DB; border-radius: 0.375rem; font-size: 0.875rem; }
+        .input-field:focus { outline: none; border-color: #2563EB; ring: 2px solid #2563EB; }
+        .section-title { font-size: 1.125rem; font-weight: 600; color: #111827; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #E5E7EB; }
+    </style>
+</head>
+<body class="bg-gray-50 p-6">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-center text-blue-600 mb-8">购车用车成本计算器</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: Inputs -->
+            <div class="space-y-6">
+                
+                <!-- 1. 购车方式 -->
+                <div>
+                    <h2 class="section-title">1. 购车与贷款信息</h2>
+                    <div class="input-group">
+                        <label class="input-label">车价 (元)</label>
+                        <input type="number" id="carPrice" class="input-field" placeholder="例如：150000">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">购车固定成本 (元) <span class="text-xs text-gray-500">(上牌费、购置税、过户费等)</span></label>
+                        <input type="number" id="initialFixedCost" class="input-field" placeholder="例如：15000">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">付款方式</label>
+                        <select id="paymentMethod" class="input-field" onchange="toggleLoanInputs()">
+                            <option value="full">全款购买</option>
+                            <option value="loan">贷款购买</option>
+                        </select>
+                    </div>
+
+                    <div id="loanInputs" class="hidden bg-blue-50 p-4 rounded-md space-y-3">
+                        <div>
+                            <label class="input-label">贷款金额 (元)</label>
+                            <input type="number" id="loanAmount" class="input-field" placeholder="例如：100000">
+                        </div>
+                        <div>
+                            <label class="input-label">年利率 (%)</label>
+                            <input type="number" id="loanRate" class="input-field" placeholder="例如：3.5" step="0.01">
+                        </div>
+                        <div>
+                            <label class="input-label">贷款期数 (月)</label>
+                            <input type="number" id="loanTerm" class="input-field" placeholder="例如：36">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 车辆类型与能耗 -->
+                <div>
+                    <h2 class="section-title">2. 车辆类型与能耗</h2>
+                    <div class="input-group">
+                        <label class="input-label">动力类型</label>
+                        <select id="carType" class="input-field" onchange="toggleEnergyInputs()">
+                            <option value="fuel">燃油车</option>
+                            <option value="electric">纯电车</option>
+                            <option value="hybrid">混动车 (燃油+电)</option>
+                        </select>
+                    </div>
+
+                    <!-- Common: Monthly Mileage -->
+                    <div class="input-group">
+                        <label class="input-label">预计每月行驶里程 (公里)</label>
+                        <input type="number" id="monthlyMileage" class="input-field" placeholder="例如：1000">
+                    </div>
+
+                    <!-- Fuel Inputs -->
+                    <div id="fuelInputs">
+                        <div class="input-group">
+                            <label class="input-label">平均油耗 (L/100KM)</label>
+                            <input type="number" id="fuelConsumption" class="input-field" value="8" step="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">油价 (元/L)</label>
+                            <input type="number" id="fuelPrice" class="input-field" value="7" step="0.01">
+                        </div>
+                    </div>
+
+                    <!-- Electric Inputs -->
+                    <div id="electricSpecifics" class="hidden">
+                        <div class="input-group">
+                            <label class="input-label">平均电耗 (度/100KM)</label>
+                            <input type="number" id="electricConsumption" class="input-field" value="11" step="0.1">
+                        </div>
+                    </div>
+
+                    <!-- Common Electric Price (For Electric & Hybrid) -->
+                    <div id="electricPriceInput" class="hidden">
+                         <div class="input-group">
+                            <label class="input-label">充电单价 (元/度) <span class="text-xs text-gray-500">(默认估算)</span></label>
+                            <input type="number" id="electricityPrice" class="input-field" value="1.0" step="0.1">
+                        </div>
+                    </div>
+
+                    <!-- Hybrid Extra Inputs -->
+                     <div id="hybridExtraInputs" class="hidden bg-green-50 p-4 rounded-md mt-2">
+                        <p class="text-sm text-gray-600 mb-2">混动额外选项</p>
+                        <div class="input-group">
+                            <label class="input-label">每月额外耗电量 (度/月) <span class="text-xs text-gray-500">(选填)</span></label>
+                            <input type="number" id="hybridMonthlyElectric" class="input-field" placeholder="0">
+                        </div>
+                     </div>
+                </div>
+
+                <!-- 3. 其他费用 -->
+                <div>
+                    <h2 class="section-title">3. 其他固定开销</h2>
+                    <div class="input-group">
+                        <label class="input-label">每年固定开销 (元) <span class="text-xs text-gray-500">(保险、停车费、保养等)</span></label>
+                        <input type="number" id="otherCostsYearly" class="input-field" value="4500">
+                    </div>
+                </div>
+
+                <button onclick="calculate()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                    开始计算
+                </button>
+
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="bg-gray-100 p-6 rounded-lg h-fit sticky top-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b border-gray-300 pb-2">计算结果</h2>
+                
+                <div class="space-y-6">
+                    <!-- Total Purchase -->
+                    <div class="bg-white p-4 rounded shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase">车辆购置总成本</h3>
+                        <p class="text-3xl font-bold text-gray-900" id="resultTotalPurchase">¥ 0</p>
+                        <p class="text-xs text-gray-500 mt-1" id="resultInterestText">含利息: ¥ 0</p>
+                    </div>
+
+                    <!-- Monthly Spend -->
+                    <div class="bg-white p-4 rounded shadow-sm border-l-4 border-blue-500">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase">预计每月总支出</h3>
+                        <p class="text-3xl font-bold text-blue-600" id="resultMonthlyTotal">¥ 0</p>
+                        <div class="mt-3 space-y-1 text-sm text-gray-600">
+                            <div class="flex justify-between"><span>月供 (贷款):</span> <span id="resultMonthlyLoan">¥ 0</span></div>
+                            <div class="flex justify-between"><span>油/电费:</span> <span id="resultMonthlyEnergy">¥ 0</span></div>
+                            <div class="flex justify-between"><span>固定摊销:</span> <span id="resultMonthlyFixed">¥ 0</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Future Projections -->
+                    <div class="bg-white p-4 rounded shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase">累计花费预测 (购车+用车)</h3>
+                        <div class="mt-3 space-y-2 text-sm">
+                            <div class="flex justify-between items-center">
+                                <span>1 年后</span>
+                                <span class="font-bold text-gray-800" id="result1Year">¥ 0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>3 年后</span>
+                                <span class="font-bold text-gray-800" id="result3Year">¥ 0</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span>5 年后</span>
+                                <span class="font-bold text-gray-800" id="result5Year">¥ 0</span>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <span>10 年后</span>
+                                <span class="font-bold text-gray-800" id="result10Year">¥ 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleLoanInputs() {
+            const method = document.getElementById('paymentMethod').value;
+            const loanInputs = document.getElementById('loanInputs');
+            if (method === 'loan') {
+                loanInputs.classList.remove('hidden');
+            } else {
+                loanInputs.classList.add('hidden');
+            }
+        }
+
+        function toggleEnergyInputs() {
+            const type = document.getElementById('carType').value;
+            const fuelInputs = document.getElementById('fuelInputs');
+            const electricSpecifics = document.getElementById('electricSpecifics');
+            const electricPriceInput = document.getElementById('electricPriceInput');
+            const hybridExtra = document.getElementById('hybridExtraInputs');
+
+            // Reset visibility
+            fuelInputs.classList.add('hidden');
+            electricSpecifics.classList.add('hidden');
+            electricPriceInput.classList.add('hidden');
+            hybridExtra.classList.add('hidden');
+
+            if (type === 'fuel') {
+                fuelInputs.classList.remove('hidden');
+            } else if (type === 'electric') {
+                electricSpecifics.classList.remove('hidden');
+                electricPriceInput.classList.remove('hidden');
+            } else if (type === 'hybrid') {
+                fuelInputs.classList.remove('hidden');
+                hybridExtra.classList.remove('hidden');
+                electricPriceInput.classList.remove('hidden');
+            }
+        }
+
+        function getNum(id) {
+            return parseFloat(document.getElementById(id).value) || 0;
+        }
+
+        function calculate() {
+            // 1. Get Values
+            const carPrice = getNum('carPrice');
+            const initialFixedCost = getNum('initialFixedCost');
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const otherCostsYearly = getNum('otherCostsYearly');
+            const carType = document.getElementById('carType').value;
+            const monthlyMileage = getNum('monthlyMileage');
+
+            // 2. Loan Calculation
+            let loanAmount = 0;
+            let totalInterest = 0;
+            let monthlyLoanPayment = 0;
+            let loanTerm = 0;
+
+            if (paymentMethod === 'loan') {
+                loanAmount = getNum('loanAmount');
+                const rateYearly = getNum('loanRate') / 100;
+                loanTerm = getNum('loanTerm');
+                
+                if (loanAmount > 0 && loanTerm > 0) {
+                    // Standard amortization formula or simple interest?
+                    // Usually car loans use simple interest or amortization. Let's use simple monthly amortization.
+                    // Monthly Rate = Yearly / 12
+                    const rateMonthly = rateYearly / 12;
+                    if (rateMonthly > 0) {
+                         monthlyLoanPayment = (loanAmount * rateMonthly * Math.pow(1 + rateMonthly, loanTerm)) / (Math.pow(1 + rateMonthly, loanTerm) - 1);
+                    } else {
+                        monthlyLoanPayment = loanAmount / loanTerm;
+                    }
+                    totalInterest = (monthlyLoanPayment * loanTerm) - loanAmount;
+                }
+            }
+
+            const totalPurchaseCost = carPrice + totalInterest + initialFixedCost;
+
+            // 3. Energy Cost Calculation (Monthly)
+            let monthlyEnergyCost = 0;
+
+            if (carType === 'fuel') {
+                const consumption = getNum('fuelConsumption'); // L/100km
+                const price = getNum('fuelPrice'); // Yuan/L
+                monthlyEnergyCost = (monthlyMileage / 100) * consumption * price;
+            } else if (carType === 'electric') {
+                const consumption = getNum('electricConsumption'); // kWh/100km
+                const price = getNum('electricityPrice'); // Yuan/kWh
+                monthlyEnergyCost = (monthlyMileage / 100) * consumption * price;
+            } else if (carType === 'hybrid') {
+                // Fuel part
+                const fuelConsumption = getNum('fuelConsumption');
+                const fuelPrice = getNum('fuelPrice');
+                const fuelCost = (monthlyMileage / 100) * fuelConsumption * fuelPrice;
+                
+                // Electric part (Optional fixed monthly)
+                const monthlyElectric = getNum('hybridMonthlyElectric'); // kWh
+                // Assuming standard electricity price if not explicitly asked for hybrid (reuse electric price input or default?)
+                // User requirement 7 says "can select/fill monthly electric consumption". It doesn't explicitly ask for price, but we need price.
+                // I'll use the electricityPrice input value (even if hidden, I should probably show it or hardcode a reasonable default if hidden).
+                // Let's grab electricity price from the hidden input if it's there, or just define a default.
+                // The current HTML hides #electricInputs for Hybrid. I should probably allow price input for Hybrid too if electric is used.
+                // For simplicity, let's assume a default charging price if not visible, or 1.0.
+                const elecPrice = getNum('electricityPrice') || 1.0;
+                const electricCost = monthlyElectric * elecPrice;
+
+                monthlyEnergyCost = fuelCost + electricCost;
+            }
+
+            // 4. Fixed Monthly Cost
+            const monthlyFixedCost = otherCostsYearly / 12;
+
+            // 5. Total Monthly Out of Pocket
+            // Note: Monthly loan payment only exists for the loan term. After that it drops.
+            // The "Expected Monthly Total Expenditure" usually refers to the immediate monthly cost.
+            const totalMonthlySpend = monthlyLoanPayment + monthlyEnergyCost + monthlyFixedCost;
+
+            // 6. Projections
+            // Cumulative Cost = Initial Payment + (Monthly Total * Months) ??
+            // Initial Payment = Car Price - Loan Amount (Down payment) + Initial Fixed Costs
+            const downPayment = carPrice - loanAmount + initialFixedCost;
+            
+            function getCumulativeCost(years) {
+                const months = years * 12;
+                let cost = downPayment; // Initial
+                
+                // Add loan payments
+                if (paymentMethod === 'loan') {
+                    const paymentsToMake = Math.min(months, loanTerm);
+                    cost += paymentsToMake * monthlyLoanPayment;
+                }
+                
+                // Add running costs (Energy + Fixed)
+                cost += months * (monthlyEnergyCost + monthlyFixedCost);
+                
+                return cost;
+            }
+
+            // Update UI
+            document.getElementById('resultTotalPurchase').textContent = '¥ ' + totalPurchaseCost.toLocaleString('zh-CN', {maximumFractionDigits: 0});
+            document.getElementById('resultInterestText').textContent = paymentMethod === 'loan' ? `含利息: ¥ ${totalInterest.toLocaleString('zh-CN', {maximumFractionDigits: 0})}` : '全款支付';
+
+            document.getElementById('resultMonthlyTotal').textContent = '¥ ' + totalMonthlySpend.toLocaleString('zh-CN', {maximumFractionDigits: 0});
+            document.getElementById('resultMonthlyLoan').textContent = '¥ ' + monthlyLoanPayment.toLocaleString('zh-CN', {maximumFractionDigits: 0});
+            document.getElementById('resultMonthlyEnergy').textContent = '¥ ' + monthlyEnergyCost.toLocaleString('zh-CN', {maximumFractionDigits: 0});
+            document.getElementById('resultMonthlyFixed').textContent = '¥ ' + monthlyFixedCost.toLocaleString('zh-CN', {maximumFractionDigits: 0});
+
+            document.getElementById('result1Year').textContent = '¥ ' + getCumulativeCost(1).toLocaleString('zh-CN', {maximumFractionDigits: 0});
+            document.getElementById('result3Year').textContent = '¥ ' + getCumulativeCost(3).toLocaleString('zh-CN', {maximumFractionDigits: 0});
+            document.getElementById('result5Year').textContent = '¥ ' + getCumulativeCost(5).toLocaleString('zh-CN', {maximumFractionDigits: 0});
+            document.getElementById('result10Year').textContent = '¥ ' + getCumulativeCost(10).toLocaleString('zh-CN', {maximumFractionDigits: 0});
+        }
+
+        // Initialize
+        toggleLoanInputs();
+        toggleEnergyInputs();
+    </script>
+</body>
+</html>
