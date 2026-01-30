@@ -42,6 +42,11 @@
                     </div>
 
                     <div class="input-group">
+                        <label class="input-label">旧车折旧抵扣 (元) <span class="text-xs text-gray-500">(选填，默认为0)</span></label>
+                        <input type="number" id="tradeInValue" class="input-field" placeholder="例如：30000">
+                    </div>
+
+                    <div class="input-group">
                         <label class="input-label">购车固定成本 (元) <span class="text-xs text-gray-500">(上牌费、购置税、过户费等)</span></label>
                         <input type="number" id="initialFixedCost" class="input-field" placeholder="例如：15000">
                     </div>
@@ -234,6 +239,7 @@
         function calculate() {
             // 1. Get Values
             const carPrice = getNum('carPrice');
+            const tradeInValue = getNum('tradeInValue'); // Trade-in value
             const initialFixedCost = getNum('initialFixedCost');
             const paymentMethod = document.getElementById('paymentMethod').value;
             const otherCostsYearly = getNum('otherCostsYearly');
@@ -265,7 +271,7 @@
                 }
             }
 
-            const totalPurchaseCost = carPrice + totalInterest + initialFixedCost;
+            const totalPurchaseCost = carPrice + totalInterest + initialFixedCost - tradeInValue;
 
             // 3. Energy Cost Calculation (Monthly)
             let monthlyEnergyCost = 0;
@@ -308,8 +314,8 @@
 
             // 6. Projections
             // Cumulative Cost = Initial Payment + (Monthly Total * Months) ??
-            // Initial Payment = Car Price - Loan Amount (Down payment) + Initial Fixed Costs
-            const downPayment = carPrice - loanAmount + initialFixedCost;
+            // Initial Payment = Car Price - Loan Amount (Down payment) + Initial Fixed Costs - Trade-in Value
+            const downPayment = carPrice - loanAmount + initialFixedCost - tradeInValue;
             
             function getCumulativeCost(years) {
                 const months = years * 12;
