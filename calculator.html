@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线计算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .btn {
+            transition: all 0.1s;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        /* Hide scrollbar for input */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Sci-buttons grid area */
+        .sci-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-10 px-4">
+
+    <!-- Navigation Back Link -->
+    <div class="w-full max-w-md mb-6">
+        <a href="index.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            返回首页
+        </a>
+    </div>
+
+    <div class="w-full max-w-md bg-gray-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-800" id="calcContainer">
+        
+        <!-- Header / Toggle -->
+        <div class="flex justify-between items-center p-4 bg-gray-800 border-b border-gray-700">
+            <h1 class="text-white font-semibold tracking-wider text-sm opacity-70">CALCULATOR</h1>
+            <div class="flex bg-gray-700 rounded-lg p-1">
+                <button onclick="setMode('simple')" id="btnSimple" class="px-3 py-1 rounded-md text-xs font-bold text-gray-900 bg-white transition-all">简单</button>
+                <button onclick="setMode('scientific')" id="btnSci" class="px-3 py-1 rounded-md text-xs font-bold text-gray-400 hover:text-white transition-all">科学</button>
+            </div>
+        </div>
+
+        <!-- Display -->
+        <div class="p-6 text-right space-y-2">
+            <div id="history" class="text-gray-400 text-sm h-6 overflow-hidden"></div>
+            <input type="text" id="display" class="w-full bg-transparent text-white text-5xl font-light text-right focus:outline-none" value="0" readonly>
+        </div>
+
+        <!-- Keypad -->
+        <div class="p-4 bg-gray-800">
+            
+            <!-- Scientific Keys (Hidden by default) -->
+            <div id="sciKeys" class="grid grid-cols-5 gap-2 mb-2 hidden">
+                <button onclick="func('sin')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">sin</button>
+                <button onclick="func('cos')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">cos</button>
+                <button onclick="func('tan')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">tan</button>
+                <button onclick="constant('PI')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">π</button>
+                <button onclick="constant('E')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">e</button>
+
+                <button onclick="func('log')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">log</button>
+                <button onclick="func('ln')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">ln</button>
+                <button onclick="func('sqrt')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">√</button>
+                <button onclick="append('^')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">^</button>
+                <button onclick="func('abs')" class="btn bg-gray-700 text-gray-300 hover:bg-gray-600 p-3 rounded-lg text-xs font-medium">abs</button>
+            </div>
+
+            <!-- Standard Keys -->
+            <div class="grid grid-cols-4 gap-3">
+                <button onclick="clearAll()" class="btn col-span-1 bg-red-500 hover:bg-red-600 text-white p-4 rounded-xl text-xl font-medium">AC</button>
+                <button onclick="deleteChar()" class="btn bg-gray-600 hover:bg-gray-500 text-white p-4 rounded-xl text-xl font-medium">⌫</button>
+                <button onclick="append('(')" class="btn bg-gray-600 hover:bg-gray-500 text-white p-4 rounded-xl text-xl font-medium">(</button>
+                <button onclick="append(')')" class="btn bg-gray-600 hover:bg-gray-500 text-white p-4 rounded-xl text-xl font-medium">)</button>
+
+                <button onclick="append('7')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">7</button>
+                <button onclick="append('8')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">8</button>
+                <button onclick="append('9')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">9</button>
+                <button onclick="append('/')" class="btn bg-orange-500 hover:bg-orange-400 text-white p-4 rounded-xl text-2xl font-medium">÷</button>
+
+                <button onclick="append('4')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">4</button>
+                <button onclick="append('5')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">5</button>
+                <button onclick="append('6')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">6</button>
+                <button onclick="append('*')" class="btn bg-orange-500 hover:bg-orange-400 text-white p-4 rounded-xl text-2xl font-medium">×</button>
+
+                <button onclick="append('1')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">1</button>
+                <button onclick="append('2')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">2</button>
+                <button onclick="append('3')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">3</button>
+                <button onclick="append('-')" class="btn bg-orange-500 hover:bg-orange-400 text-white p-4 rounded-xl text-2xl font-medium">-</button>
+
+                <button onclick="append('0')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">0</button>
+                <button onclick="append('.')" class="btn bg-gray-700 hover:bg-gray-600 text-white p-4 rounded-xl text-2xl font-medium">.</button>
+                <button onclick="calculate()" class="btn bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-xl text-2xl font-medium">=</button>
+                <button onclick="append('+')" class="btn bg-orange-500 hover:bg-orange-400 text-white p-4 rounded-xl text-2xl font-medium">+</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentInput = "0";
+        let shouldReset = false;
+
+        const display = document.getElementById('display');
+        const history = document.getElementById('history');
+
+        function updateDisplay() {
+            display.value = currentInput;
+        }
+
+        function setMode(mode) {
+            const btnSimple = document.getElementById('btnSimple');
+            const btnSci = document.getElementById('btnSci');
+            const sciKeys = document.getElementById('sciKeys');
+            const container = document.getElementById('calcContainer');
+
+            if (mode === 'simple') {
+                btnSimple.className = "px-3 py-1 rounded-md text-xs font-bold text-gray-900 bg-white transition-all shadow";
+                btnSci.className = "px-3 py-1 rounded-md text-xs font-bold text-gray-400 hover:text-white transition-all";
+                sciKeys.classList.add('hidden');
+                container.classList.add('max-w-md');
+                container.classList.remove('max-w-xl');
+            } else {
+                btnSimple.className = "px-3 py-1 rounded-md text-xs font-bold text-gray-400 hover:text-white transition-all";
+                btnSci.className = "px-3 py-1 rounded-md text-xs font-bold text-gray-900 bg-white transition-all shadow";
+                sciKeys.classList.remove('hidden');
+                container.classList.remove('max-w-md');
+                container.classList.add('max-w-xl');
+            }
+        }
+
+        function append(val) {
+            if (shouldReset && !['+', '-', '*', '/', '^'].includes(val)) {
+                currentInput = "";
+                shouldReset = false;
+            }
+            if (shouldReset) shouldReset = false;
+
+            if (currentInput === "0" && val !== ".") {
+                currentInput = val;
+            } else {
+                currentInput += val;
+            }
+            updateDisplay();
+        }
+
+        function constant(name) {
+            if (shouldReset) {
+                currentInput = "";
+                shouldReset = false;
+            }
+            const val = name === 'PI' ? 'π' : 'e';
+            if (currentInput === "0") {
+                currentInput = val;
+            } else {
+                currentInput += val;
+            }
+            updateDisplay();
+        }
+
+        function func(fnName) {
+            if (shouldReset) {
+                currentInput = "";
+                shouldReset = false;
+            }
+            // For functions like sin, we add sin(
+            if (currentInput === "0") {
+                currentInput = fnName + "(";
+            } else {
+                currentInput += fnName + "(";
+            }
+            updateDisplay();
+        }
+
+        function clearAll() {
+            currentInput = "0";
+            history.textContent = "";
+            shouldReset = false;
+            updateDisplay();
+        }
+
+        function deleteChar() {
+            if (currentInput.length === 1 || currentInput === "Error" || currentInput === "Infinity") {
+                currentInput = "0";
+            } else {
+                currentInput = currentInput.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        function calculate() {
+            try {
+                let expression = currentInput;
+                
+                // Replace UI symbols with JS Math equivalent
+                expression = expression.replace(/π/g, 'Math.PI');
+                expression = expression.replace(/e/g, 'Math.E');
+                expression = expression.replace(/sin\(/g, 'Math.sin(');
+                expression = expression.replace(/cos\(/g, 'Math.cos(');
+                expression = expression.replace(/tan\(/g, 'Math.tan(');
+                expression = expression.replace(/log\(/g, 'Math.log10(');
+                expression = expression.replace(/ln\(/g, 'Math.log(');
+                expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+                expression = expression.replace(/abs\(/g, 'Math.abs(');
+                expression = expression.replace(/\^/g, '**');
+
+                // Evaluate
+                // Note: eval is used here for calculator simplicity in a local client-side tool.
+                const result = eval(expression);
+
+                // Format result
+                let resultStr = String(result);
+                if (resultStr.includes('.')) {
+                    // Avoid long decimals if possible, but keep precision
+                    resultStr = parseFloat(result.toFixed(10)).toString(); 
+                }
+
+                history.textContent = currentInput + " =";
+                currentInput = resultStr;
+                shouldReset = true;
+                updateDisplay();
+
+            } catch (e) {
+                currentInput = "Error";
+                shouldReset = true;
+                updateDisplay();
+            }
+        }
+    </script>
+</body>
+</html>
