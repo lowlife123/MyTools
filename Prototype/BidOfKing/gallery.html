@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>展览馆 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 30px;
+            color: white;
+        }
+
+        .page-title {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .info-bar {
+            position: absolute;
+            top: 105px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .coin-storage {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #4a2c00;
+        }
+
+        .content-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 150px;
+            left: 0;
+            right: 0;
+            bottom: 160px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .booth-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .booth-card {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .booth-card.unlocked:hover {
+            transform: scale(1.03);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .booth-card.locked {
+            opacity: 0.5;
+            filter: grayscale(0.5);
+        }
+
+        .booth-card.locked .booth-icon {
+            font-size: 40px;
+            opacity: 0.3;
+        }
+
+        .booth-icon {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        .booth-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 3px;
+        }
+
+        .booth-earnings {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+        }
+
+        .booth-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stored-amount {
+            font-size: 12px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .collect-btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #4a2c00;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .collect-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .collect-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .locked-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .locked-icon {
+            font-size: 35px;
+        }
+
+        .locked-text {
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .locked-level {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700 0%, #ff8c00 100%);
+            transition: width 0.3s ease;
+        }
+
+        .collect-all-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #4a2c00;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .collect-all-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .collect-all-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            transform: translateX(-50%);
+            box-shadow: none;
+        }
+
+        .tips {
+            position: absolute;
+            bottom: 130px;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="back-btn" onclick="location.href='home.html'">
+                <span>←</span>
+            </div>
+            <div class="page-title">展览馆</div>
+            <div class="info-bar">
+                <div class="level-info">
+                    <span>⭐</span>
+                    <span id="player-level">Lv.25</span>
+                </div>
+                <div class="coin-storage">
+                    <span>💰</span>
+                    <span id="total-stored">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="booth-grid" id="booth-grid">
+            </div>
+        </div>
+
+        <div class="tips">每个展位每小时可获得 8,000 金币</div>
+        <button class="collect-all-btn" id="collect-all" onclick="collectAll()">一键领取</button>
+    </div>
+
+    <script>
+        const playerLevel = 25;
+        const maxStorage = 200000;
+        const earningsPerHour = 8000;
+        
+        const booths = [
+            { id: 1, name: '展位 A', icon: '🏪', unlockLevel: 1, unlocked: true },
+            { id: 2, name: '展位 B', icon: '🏪', unlockLevel: 10, unlocked: false },
+            { id: 3, name: '展位 C', icon: '🏪', unlockLevel: 20, unlocked: false },
+            { id: 4, name: '展位 D', icon: '🏪', unlockLevel: 30, unlocked: false },
+            { id: 5, name: '展位 E', icon: '🏪', unlockLevel: 40, unlocked: false },
+            { id: 6, name: '展位 F', icon: '🏪', unlockLevel: 50, unlocked: false }
+        ];
+
+        const boothStorage = {
+            1: 16000,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0
+        };
+
+        function initBooths() {
+            booths.forEach(booth => {
+                if (playerLevel >= booth.unlockLevel) {
+                    booth.unlocked = true;
+                }
+            });
+            updateDisplay();
+        }
+
+        function calculateStored(boothId) {
+            const stored = boothStorage[boothId] || 0;
+            return Math.min(stored, maxStorage);
+        }
+
+        function getTotalStored() {
+            let total = 0;
+            booths.forEach(booth => {
+                if (booth.unlocked) {
+                    total += calculateStored(booth.id);
+                }
+            });
+            return total;
+        }
+
+        function canCollect(boothId) {
+            return calculateStored(boothId) >= earningsPerHour;
+        }
+
+        function canCollectAny() {
+            return booths.some(booth => booth.unlocked && canCollect(booth.id));
+        }
+
+        function collectCoins(boothId) {
+            if (!canCollect(boothId)) return;
+            
+            const amount = Math.min(calculateStored(boothId), earningsPerHour);
+            boothStorage[boothId] -= amount;
+            updateDisplay();
+        }
+
+        function collectAll() {
+            booths.forEach(booth => {
+                if (booth.unlocked) {
+                    while (canCollect(booth.id)) {
+                        collectCoins(booth.id);
+                    }
+                }
+            });
+        }
+
+        function renderBooths() {
+            const grid = document.getElementById('booth-grid');
+            let html = '';
+
+            booths.forEach(booth => {
+                const stored = calculateStored(booth.id);
+                const canCollectThis = canCollect(booth.id);
+                
+                html += `
+                    <div class="booth-card ${booth.unlocked ? 'unlocked' : 'locked'}">
+                        <span class="booth-icon">${booth.icon}</span>
+                        <span class="booth-name">${booth.name}</span>
+                        <span class="booth-earnings">+${earningsPerHour.toLocaleString()}/时</span>
+                        
+                        ${booth.unlocked ? `
+                            <div class="booth-status">
+                                <span class="stored-amount">💰 ${stored.toLocaleString()}</span>
+                                <button class="collect-btn" 
+                                    onclick="collectCoins(${booth.id})" 
+                                    ${!canCollectThis ? 'disabled' : ''}>
+                                    ${canCollectThis ? '领取' : '等待'}
+                                </button>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(stored / maxStorage) * 100}%"></div>
+                            </div>
+                        ` : ''}
+                        
+                        ${!booth.unlocked ? `
+                            <div class="locked-overlay">
+                                <span class="locked-icon">🔒</span>
+                                <span class="locked-text">未解锁</span>
+                                <span class="locked-level">需要 Lv.${booth.unlockLevel}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function updateDisplay() {
+            document.getElementById('player-level').textContent = `Lv.${playerLevel}`;
+            document.getElementById('total-stored').textContent = getTotalStored().toLocaleString();
+            
+            const collectAllBtn = document.getElementById('collect-all');
+            collectAllBtn.disabled = !canCollectAny();
+            
+            renderBooths();
+        }
+
+        function simulateEarnings() {
+            booths.forEach(booth => {
+                if (booth.unlocked) {
+                    boothStorage[booth.id] = Math.min(boothStorage[booth.id] + earningsPerHour, maxStorage);
+                }
+            });
+            updateDisplay();
+        }
+
+        initBooths();
+        setInterval(simulateEarnings, 5000);
+    </script>
+</body>
+</html>

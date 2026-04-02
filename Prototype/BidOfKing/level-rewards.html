@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>等级奖励 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 30px;
+            color: white;
+        }
+
+        .page-title {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-area {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            padding: 20px 30px;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 80px;
+            z-index: 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 35px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ffd700 0%, #ff8c00 50%, #a855f7 100%);
+            border-radius: 2px;
+            z-index: 0;
+        }
+
+        .level-item {
+            position: relative;
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .level-node {
+            position: absolute;
+            left: -80px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: 4px solid;
+            z-index: 10;
+            background: #2a2a4a;
+        }
+
+        .level-node.current {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            border-color: #ffd700;
+            color: #4a2c00;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .level-node.locked {
+            background: #2a2a4a;
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .level-node.unlocked {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        .level-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 12px 15px;
+            flex: 1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            min-width: 0;
+        }
+
+        .level-card:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .level-card.current {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 140, 0, 0.2) 100%);
+            border-color: rgba(255, 215, 0, 0.5);
+        }
+
+        .level-card.unlocked {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .level-card.locked {
+            opacity: 0.6;
+        }
+
+        .level-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .level-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .level-rewards {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            min-width: 0;
+            max-width: 180px;
+        }
+
+        .reward-item {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .level-status {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 15px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .level-status.current {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #4a2c00;
+        }
+
+        .level-status.unlocked {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .level-status.locked {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="back-btn" onclick="location.href='home.html'">
+                <span>←</span>
+            </div>
+            <div class="page-title">等级奖励</div>
+        </div>
+
+        <div class="content-area">
+            <div class="timeline" id="timeline">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentLevel = 25;
+
+        const levelRewards = [
+            { level: 1, rewards: [{ icon: '💰', value: '1,000' }] },
+            { level: 2, rewards: [{ icon: '💰', value: '2,000' }] },
+            { level: 3, rewards: [{ icon: '💰', value: '3,000' }, { icon: '📱', value: '智能手机' }] },
+            { level: 4, rewards: [{ icon: '💰', value: '4,000' }] },
+            { level: 5, rewards: [{ icon: '💰', value: '5,000' }, { icon: '💎', value: '5' }] },
+            { level: 6, rewards: [{ icon: '💰', value: '6,000' }] },
+            { level: 7, rewards: [{ icon: '💰', value: '7,000' }, { icon: '📦', value: '中级包' }] },
+            { level: 8, rewards: [{ icon: '💰', value: '8,000' }] },
+            { level: 9, rewards: [{ icon: '💰', value: '9,000' }] },
+            { level: 10, rewards: [{ icon: '💰', value: '10,000' }, { icon: '🏪', value: '展位B' }] },
+            { level: 11, rewards: [{ icon: '💰', value: '12,000' }] },
+            { level: 12, rewards: [{ icon: '💰', value: '14,000' }, { icon: '💻', value: '笔记本电脑' }] },
+            { level: 13, rewards: [{ icon: '💰', value: '16,000' }] },
+            { level: 14, rewards: [{ icon: '💰', value: '18,000' }] },
+            { level: 15, rewards: [{ icon: '💰', value: '20,000' }, { icon: '💎', value: '10' }] },
+            { level: 16, rewards: [{ icon: '💰', value: '22,000' }] },
+            { level: 17, rewards: [{ icon: '💰', value: '24,000' }, { icon: '📦', value: '高级包' }] },
+            { level: 18, rewards: [{ icon: '💰', value: '26,000' }] },
+            { level: 19, rewards: [{ icon: '💰', value: '28,000' }] },
+            { level: 20, rewards: [{ icon: '💰', value: '30,000' }, { icon: '🏪', value: '展位C' }] },
+            { level: 21, rewards: [{ icon: '💰', value: '35,000' }] },
+            { level: 22, rewards: [{ icon: '💰', value: '40,000' }, { icon: '👑', value: '王冠' }] },
+            { level: 23, rewards: [{ icon: '💰', value: '45,000' }] },
+            { level: 24, rewards: [{ icon: '💰', value: '50,000' }] },
+            { level: 25, rewards: [{ icon: '💰', value: '100,000' }, { icon: '💎', value: '50' }, { icon: '🎁', value: '豪华礼包' }] },
+            { level: 26, rewards: [{ icon: '💰', value: '60,000' }] },
+            { level: 27, rewards: [{ icon: '💰', value: '70,000' }, { icon: '⌚', value: '智能手表' }] },
+            { level: 28, rewards: [{ icon: '💰', value: '80,000' }] },
+            { level: 29, rewards: [{ icon: '💰', value: '90,000' }] },
+            { level: 30, rewards: [{ icon: '💰', value: '100,000' }, { icon: '🏪', value: '展位D' }, { icon: '💎', value: '20' }] },
+            { level: 31, rewards: [{ icon: '💰', value: '110,000' }] },
+            { level: 32, rewards: [{ icon: '💰', value: '120,000' }, { icon: '🎧', value: '无线耳机' }] },
+            { level: 33, rewards: [{ icon: '💰', value: '130,000' }] },
+            { level: 34, rewards: [{ icon: '💰', value: '140,000' }] },
+            { level: 35, rewards: [{ icon: '💰', value: '150,000' }, { icon: '📦', value: '至尊包' }] },
+            { level: 36, rewards: [{ icon: '💰', value: '160,000' }] },
+            { level: 37, rewards: [{ icon: '💰', value: '170,000' }, { icon: '📲', value: '平板电脑' }] },
+            { level: 38, rewards: [{ icon: '💰', value: '180,000' }] },
+            { level: 39, rewards: [{ icon: '💰', value: '190,000' }] },
+            { level: 40, rewards: [{ icon: '💰', value: '200,000' }, { icon: '🏪', value: '展位E' }, { icon: '💎', value: '30' }] },
+            { level: 41, rewards: [{ icon: '💰', value: '220,000' }] },
+            { level: 42, rewards: [{ icon: '💰', value: '240,000' }, { icon: '🚁', value: '无人机' }] },
+            { level: 43, rewards: [{ icon: '💰', value: '260,000' }] },
+            { level: 44, rewards: [{ icon: '💰', value: '280,000' }] },
+            { level: 45, rewards: [{ icon: '💰', value: '300,000' }, { icon: '💎', value: '50' }, { icon: '👑', value: '皇冠' }] },
+            { level: 46, rewards: [{ icon: '💰', value: '320,000' }] },
+            { level: 47, rewards: [{ icon: '💰', value: '340,000' }, { icon: '🥽', value: 'VR设备' }] },
+            { level: 48, rewards: [{ icon: '💰', value: '360,000' }] },
+            { level: 49, rewards: [{ icon: '💰', value: '380,000' }] },
+            { level: 50, rewards: [{ icon: '💰', value: '500,000' }, { icon: '💎', value: '100' }, { icon: '🏆', value: '王者奖杯' }] }
+        ];
+
+        function renderTimeline() {
+            const timeline = document.getElementById('timeline');
+            let html = '';
+
+            levelRewards.slice().reverse().forEach((item, index) => {
+                const isCurrent = item.level === currentLevel;
+                const isUnlocked = item.level < currentLevel;
+                const isLocked = item.level > currentLevel;
+                
+                let nodeClass = 'locked';
+                let cardClass = 'locked';
+                let statusText = '未解锁';
+                let statusClass = 'locked';
+                
+                if (isCurrent) {
+                    nodeClass = 'current';
+                    cardClass = 'current';
+                    statusText = '当前等级';
+                    statusClass = 'current';
+                } else if (isUnlocked) {
+                    nodeClass = 'unlocked';
+                    cardClass = 'unlocked';
+                    statusText = '已领取';
+                    statusClass = 'unlocked';
+                }
+
+                const rewardsHtml = item.rewards.map(r => 
+                    `<span class="reward-item">${r.icon} ${r.value}</span>`
+                ).join('');
+
+                html += `
+                    <div class="level-item">
+                        <div class="level-node ${nodeClass}">
+                            ${item.level}
+                        </div>
+                        <div class="level-card ${cardClass}">
+                            <div class="level-info">
+                                <span class="level-title">Lv.${item.level}</span>
+                                <div class="level-rewards">
+                                    ${rewardsHtml}
+                                </div>
+                            </div>
+                            <span class="level-status ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            timeline.innerHTML = html;
+        }
+
+        renderTimeline();
+
+        function scrollToCurrentLevel() {
+            const currentElement = document.querySelector('.level-node.current');
+            if (currentElement) {
+                setTimeout(() => {
+                    currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+
+        scrollToCurrentLevel();
+    </script>
+</body>
+</html>
