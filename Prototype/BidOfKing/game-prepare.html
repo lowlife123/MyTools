@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>准备开始 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 26px;
+            color: white;
+        }
+
+        .page-title {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .level-info {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            padding: 10px 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .level-info-icon {
+            font-size: 20px;
+        }
+
+        .level-info-text {
+            font-size: 15px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 145px;
+            left: 0;
+            right: 0;
+            bottom: 100px;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .section {
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 14px;
+            background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
+            border-radius: 2px;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .character-card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .character-card:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            transform: scale(1.02);
+        }
+
+        .character-card.selected {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.08) 100%);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.25);
+        }
+
+        .character-card.locked {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .character-card.locked:hover {
+            border-color: rgba(255, 255, 255, 0.08);
+            transform: none;
+        }
+
+        .character-card .avatar {
+            font-size: 51px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 80%;
+            width: 100%;
+        }
+
+        .character-card .name {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            white-space: nowrap;
+            height: 20%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .character-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            color: white;
+            z-index: 10;
+        }
+
+        .skill-info {
+            background: rgba(255, 215, 0, 0.08);
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            margin-bottom: 12px;
+            min-height: 60px;
+        }
+
+        .skill-info-title {
+            font-size: 11px;
+            color: #ffd700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .skill-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .skill-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .skill-icon {
+            font-size: 14px;
+        }
+
+        .skill-name {
+            font-size: 11px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .skill-desc {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .skill-empty {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            padding: 8px;
+        }
+
+        .prop-skill-info {
+            background: rgba(59, 130, 246, 0.08);
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            margin-bottom: 12px;
+            min-height: 60px;
+        }
+
+        .prop-skill-info-title {
+            font-size: 11px;
+            color: #60a5fa;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .prop-skill-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .prop-skill-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .prop-skill-icon {
+            font-size: 14px;
+        }
+
+        .prop-skill-name {
+            font-size: 11px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .prop-skill-desc {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .props-section {
+            opacity: 0.7;
+        }
+
+        .props-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .prop-card-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .prop-card {
+            width: 100%;
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .prop-card:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        .prop-card.has-quantity {
+            border-color: rgba(255, 215, 0, 0.5);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .prop-card.selected {
+            border-color: #60a5fa;
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .prop-card .icon {
+            font-size: 45px;
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prop-card .name {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            height: 20%;
+        }
+
+        .quantity-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .prop-controls {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .prop-btn {
+            flex: 1;
+            height: 18px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .prop-btn.minus {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+        }
+
+        .prop-btn.plus {
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+        }
+
+        .prop-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .prop-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .prop-btn.disabled:hover {
+            transform: none;
+        }
+
+        .bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.98) 100%);
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .start-btn span {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .start-btn:disabled {
+            background: linear-gradient(135deg, #666 0%, #444 100%);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .start-btn:disabled:hover {
+            transform: none;
+        }
+
+        .hint-text {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="back-btn" onclick="location.href='select-level.html'">
+                <span>←</span>
+            </div>
+            <div class="page-title">准备开始</div>
+        </div>
+
+        <div class="level-info">
+            <span class="level-info-icon" id="levelIcon">🏘️</span>
+            <span class="level-info-text" id="levelName">新手村</span>
+        </div>
+
+        <div class="content-area">
+            <div class="section">
+                <div class="section-title">选择角色</div>
+                <div class="character-grid" id="characterList">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="skill-info" id="skillInfo">
+                    <div class="skill-empty">选择一个角色查看技能</div>
+                </div>
+            </div>
+
+            <div class="section props-section">
+                <div class="section-title">携带道具 (已选 <span id="selectedCount">0</span>/3)</div>
+                <div class="props-grid" id="propsGrid">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="prop-skill-info" id="propSkillInfo">
+                    <div class="skill-empty">选择一个道具查看详情</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="hint-text">选择一个角色和最多3个道具</div>
+            <button class="start-btn" id="startBtn" onclick="startGame()">
+                <span>开始竞拍</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            { id: 1, name: '新手村', icon: '🏘️', desc: '适合新手的入门关卡', unlocked: true },
+            { id: 2, name: '二手市场', icon: '🏪', desc: '充满了各种二手宝贝的市集', unlocked: true },
+            { id: 3, name: '古玩城', icon: '🏛️', desc: '古代文物聚集地', unlocked: true },
+            { id: 4, name: '拍卖会场', icon: '🔨', desc: '顶级拍卖行', unlocked: false },
+            { id: 5, name: '传奇殿堂', icon: '👑', desc: '终极挑战', unlocked: false }
+        ];
+
+        const characters = [
+            { id: 2, name: '废品收集者', avatar: '♻️', owned: true,
+                skills: [
+                    { name: '变废为宝', icon: '✨', desc: '5%概率变稀有' },
+                    { name: '淘宝达人', icon: '🛍️', desc: '每日额外搜索1次' }
+                ]
+            },
+            { id: 1, name: '珠宝商人', avatar: '💎', owned: true,
+                skills: [
+                    { name: '慧眼识珠', icon: '🔍', desc: '鉴定成功率提升30%' },
+                    { name: '人脉广泛', icon: '🤝', desc: '竞拍时间+10%' }
+                ]
+            },
+            { id: 3, name: '考古专家', avatar: '🏺', owned: true,
+                skills: [
+                    { name: '年代鉴定', icon: '📜', desc: '查看物品准确年代' },
+                    { name: '文物专家', icon: '🏛️', desc: '古代文物成功率+25%' }
+                ]
+            },
+            { id: 4, name: '收藏家', avatar: '🎨', owned: true,
+                skills: [
+                    { name: '收藏大师', icon: '📚', desc: '收集所需数量-1' },
+                    { name: '珍品雷达', icon: '📡', desc: '更高概率发现珍品' }
+                ]
+            },
+            { id: 5, name: '军事爱好者', avatar: '🎖️', owned: true,
+                skills: [
+                    { name: '军事专家', icon: '⚔️', desc: '军事藏品必得' },
+                    { name: '情报网络', icon: '📡', desc: '提前得知拍卖藏品' }
+                ]
+            },
+            { id: 6, name: '财富大亨', avatar: '💰', owned: false,
+                skills: [
+                    { name: '金钱帝国', icon: '💵', desc: '竞价无资金上限' },
+                    { name: 'VIP特权', icon: '👑', desc: '手续费全免' }
+                ]
+            },
+            { id: 7, name: '粗鲁竞拍手', avatar: '🔨', owned: false,
+                skills: [
+                    { name: '心理战术', icon: '🧠', desc: '对手15%概率退缩' },
+                    { name: '最后通牒', icon: '⏰', desc: '最后10秒成功率+20%' }
+                ]
+            },
+            { id: 8, name: '医生', avatar: '⚕️', owned: false,
+                skills: [
+                    { name: '健康保障', icon: '💊', desc: '失败恢复5%体力' },
+                    { name: '医药百科', icon: '📖', desc: '医学物品100%鉴定' }
+                ]
+            },
+            { id: 9, name: '私家侦探', avatar: '🔍', owned: false,
+                skills: [
+                    { name: '追踪术', icon: '🗺️', desc: '查询物品历任所有者' },
+                    { name: '情报分析', icon: '💡', desc: '查看对手心理价位' }
+                ]
+            },
+            { id: 10, name: '法国赌神', avatar: '🃏', owned: false,
+                skills: [
+                    { name: '概率大师', icon: '🎲', desc: '预测拍品价值区间' },
+                    { name: '幸运女神', icon: '🍀', desc: '每日一次免费重拍' }
+                ]
+            }
+        ];
+
+        const props = [
+            { id: 1, name: '放大镜', icon: '🔍', desc: '可查看物品详细信息', owned: 5 },
+            { id: 2, name: '计时器', icon: '⏱️', desc: '增加10秒竞拍时间', owned: 3 },
+            { id: 3, name: '护目镜', icon: '🥽', desc: '鉴定成功率+15%', owned: 2 },
+            { id: 4, name: '计算器', icon: '🧮', desc: '快速计算物品价值', owned: 4 },
+            { id: 5, name: '记事本', icon: '📒', desc: '记录物品历史价格', owned: 1 },
+            { id: 6, name: '手电筒', icon: '🔦', desc: '发现隐藏物品', owned: 3 },
+            { id: 7, name: '地图', icon: '🗺️', desc: '显示宝藏位置', owned: 2 },
+            { id: 8, name: '指南针', icon: '🧭', desc: '指引稀有物品方向', owned: 1 },
+            { id: 9, name: '水杯', icon: '🥤', desc: '恢复5点体力', owned: 6 }
+        ];
+
+        let currentLevel = 1;
+        let selectedCharacter = 2;
+        let selectedProp = null;
+        let propQuantities = {};
+
+        function init() {
+            const params = new URLSearchParams(window.location.search);
+            currentLevel = parseInt(params.get('level')) || 1;
+            
+            const level = levels.find(l => l.id === currentLevel);
+            if (level) {
+                document.getElementById('levelIcon').textContent = level.icon;
+                document.getElementById('levelName').textContent = level.name;
+            }
+
+            renderCharacters();
+            renderSkillInfo(2);
+            renderProps();
+            renderPropSkillInfo(null);
+            updateStartButton();
+        }
+
+        function renderCharacters() {
+            const container = document.getElementById('characterList');
+            let html = '';
+            characters.forEach(char => {
+                const lockedClass = char.owned ? '' : 'locked';
+                const selectedClass = selectedCharacter === char.id ? 'selected' : '';
+                html += `
+                    <div class="character-card ${lockedClass} ${selectedClass}" onclick="selectCharacter(${char.id})">
+                        <div class="avatar">${char.avatar}</div>
+                        <div class="name">${char.name}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderProps() {
+            const container = document.getElementById('propsGrid');
+            let html = '';
+            const totalProps = Object.values(propQuantities).reduce((a, b) => a + b, 0);
+            
+            props.forEach(prop => {
+                const qty = propQuantities[prop.id] || 0;
+                const hasQtyClass = qty > 0 ? 'has-quantity' : '';
+                const selectedClass = selectedProp === prop.id ? 'selected' : '';
+                
+                const minusDisabled = qty <= 0 ? 'disabled' : '';
+                const plusDisabled = totalProps >= 3 ? 'disabled' : '';
+                
+                html += `
+                    <div class="prop-card-wrapper">
+                        <div class="prop-card ${hasQtyClass} ${selectedClass}" onclick="selectProp(${prop.id})">
+                            <div class="icon">
+                                ${prop.icon}
+                                ${qty > 0 ? `<div class="quantity-badge">${qty}</div>` : ''}
+                            </div>
+                            <div class="name">${prop.name}</div>
+                        </div>
+                        <div class="prop-controls">
+                            <button class="prop-btn minus ${minusDisabled}" onclick="event.stopPropagation(); changePropQty(${prop.id}, -1)">-</button>
+                            <button class="prop-btn plus ${plusDisabled}" onclick="event.stopPropagation(); changePropQty(${prop.id}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            document.getElementById('selectedCount').textContent = totalProps;
+        }
+
+        function selectProp(propId) {
+            selectedProp = propId;
+            renderProps();
+            renderPropSkillInfo(propId);
+        }
+
+        function renderPropSkillInfo(propId) {
+            const container = document.getElementById('propSkillInfo');
+            const prop = props.find(p => p.id === propId);
+            
+            if (!prop) {
+                container.innerHTML = '<div class="skill-empty">选择一个道具查看详情</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="prop-skill-info-title">📦 道具详情</div>
+                <div class="prop-skill-item">
+                    <span class="prop-skill-icon">${prop.icon}</span>
+                    <span class="prop-skill-name">${prop.name}</span>
+                    <span class="prop-skill-desc"> | 拥有: ${prop.owned}</span>
+                </div>
+                <div class="prop-skill-item">
+                    <span class="prop-skill-desc">${prop.desc}</span>
+                </div>
+            `;
+        }
+
+        function changePropQty(propId, delta) {
+            const currentQty = propQuantities[propId] || 0;
+            const totalProps = Object.values(propQuantities).reduce((a, b) => a + b, 0);
+            
+            if (delta > 0) {
+                if (totalProps >= 3) return;
+                propQuantities[propId] = currentQty + 1;
+            } else {
+                if (currentQty <= 0) return;
+                propQuantities[propId] = currentQty - 1;
+                if (propQuantities[propId] === 0) delete propQuantities[propId];
+            }
+            
+            renderProps();
+        }
+
+        function renderSkillInfo(charId) {
+            const container = document.getElementById('skillInfo');
+            const char = characters.find(c => c.id === charId);
+            
+            if (!char) {
+                container.innerHTML = '<div class="skill-empty">选择一个角色查看技能</div>';
+                return;
+            }
+
+            let html = '<div class="skill-info-title">🎯 角色技能</div>';
+            char.skills.forEach(skill => {
+                html += `
+                    <div class="skill-item">
+                        <span class="skill-icon">${skill.icon}</span>
+                        <span class="skill-name">${skill.name}:</span>
+                        <span class="skill-desc">${skill.desc}</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function selectCharacter(charId) {
+            const char = characters.find(c => c.id === charId);
+            if (!char.owned) {
+                alert('该角色尚未解锁！');
+                return;
+            }
+            selectedCharacter = charId;
+            renderCharacters();
+            renderSkillInfo(charId);
+            updateStartButton();
+        }
+
+        function updateStartButton() {
+            const btn = document.getElementById('startBtn');
+            btn.disabled = !selectedCharacter;
+        }
+
+        function startGame() {
+            if (!selectedCharacter) {
+                alert('请选择一个角色！');
+                return;
+            }
+            const char = characters.find(c => c.id === selectedCharacter);
+            
+            console.log('开始游戏:', {
+                level: currentLevel,
+                character: char,
+                props: propQuantities
+            });
+            
+            location.href = 'game.html?level=' + currentLevel;
+        }
+
+        init();
+    </script>
+</body>
+</html>

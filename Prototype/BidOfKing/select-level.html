@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择关卡 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 26px;
+            color: white;
+        }
+
+        .page-title {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .level-container {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            bottom: 140px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .level-track {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding-left: 90px;
+        }
+
+        .level-card {
+            width: 300px;
+            height: 85%;
+            margin-right: 20px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 25px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            transform: scale(0.85);
+            opacity: 0.6;
+        }
+
+        .level-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.15) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .level-card.active {
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .level-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .level-card.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+        }
+
+        .level-number {
+            font-size: 80px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-card.active .level-number {
+            background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .level-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-desc {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+
+        .level-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dots {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            width: 30px;
+            border-radius: 5px;
+        }
+
+        .confirm-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            padding: 18px;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-btn:hover {
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .confirm-btn.disabled {
+            background: linear-gradient(135deg, #666 0%, #444 100%);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .confirm-btn.disabled:hover {
+            transform: translateX(-50%);
+        }
+
+        .confirm-btn span {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .confirm-btn.disabled span {
+            color: #999;
+        }
+
+        .swipe-hint {
+            position: absolute;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .swipe-hint span {
+            animation: bounce 1.5s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="back-btn" onclick="location.href='home.html'">
+                <span>←</span>
+            </div>
+            <div class="page-title">选择关卡</div>
+        </div>
+
+        <div class="level-container" id="levelContainer">
+            <div class="level-track" id="levelTrack">
+            </div>
+        </div>
+
+        <div class="dots" id="dots">
+        </div>
+
+        <div class="swipe-hint">
+            <span>👆</span> 左右滑动或点击选择关卡
+        </div>
+
+        <div class="confirm-btn" id="confirmBtn" onclick="confirmLevel()">
+            <span>下一步</span>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            { id: 1, name: '新手村', icon: '🏘️', desc: '适合新手的入门关卡，这里可以学习基本的竞价技巧', unlocked: true },
+            { id: 2, name: '二手市场', icon: '🏪', desc: '充满了各种二手宝贝的市集，需要敏锐的眼光', unlocked: true },
+            { id: 3, name: '古玩城', icon: '🏛️', desc: '古代文物聚集地，鉴定专家的战场', unlocked: true },
+            { id: 4, name: '拍卖会场', icon: '🔨', desc: '顶级拍卖行在此，竞争激烈的大舞台', unlocked: false },
+            { id: 5, name: '传奇殿堂', icon: '👑', desc: '终极挑战，只有最强者才能踏入的圣地', unlocked: false }
+        ];
+
+        let currentLevel = 0;
+        let isDragging = false;
+        let startX = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+
+        function init() {
+            renderLevels();
+            renderDots();
+            updatePosition();
+        }
+
+        function renderLevels() {
+            const track = document.getElementById('levelTrack');
+            let html = '';
+            levels.forEach((level, index) => {
+                const lockedClass = level.unlocked ? '' : 'locked';
+                const activeClass = index === currentLevel ? 'active' : '';
+                html += `
+                    <div class="level-card ${lockedClass} ${activeClass}" onclick="selectLevel(${index})">
+                        <div class="level-icon">${level.icon}</div>
+                        <div class="level-number">${level.id}</div>
+                        <div class="level-name">${level.name}</div>
+                        <div class="level-desc">${level.desc}</div>
+                    </div>
+                `;
+            });
+            track.innerHTML = html;
+        }
+
+        function renderDots() {
+            const dotsContainer = document.getElementById('dots');
+            let html = '';
+            levels.forEach((_, index) => {
+                const activeClass = index === currentLevel ? 'active' : '';
+                html += `<div class="dot ${activeClass}" onclick="goToLevel(${index})"></div>`;
+            });
+            dotsContainer.innerHTML = html;
+        }
+
+        function selectLevel(index) {
+            currentLevel = index;
+            updatePosition();
+        }
+
+        function goToLevel(index) {
+            currentLevel = index;
+            updatePosition();
+        }
+
+        function updatePosition() {
+            const track = document.getElementById('levelTrack');
+            const container = document.getElementById('levelContainer');
+            const cardWidth = 300 + 20;
+            const offset = 90;
+            
+            currentTranslate = -(currentLevel * cardWidth - (container.offsetWidth / 2 - cardWidth / 2) + offset);
+            track.style.transform = `translateX(${currentTranslate}px)`;
+            prevTranslate = currentTranslate;
+
+            document.querySelectorAll('.level-card').forEach((card, index) => {
+                card.classList.toggle('active', index === currentLevel);
+            });
+
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentLevel);
+            });
+
+            updateConfirmButton();
+        }
+
+        function updateConfirmButton() {
+            const btn = document.getElementById('confirmBtn');
+            const selectedLevel = levels[currentLevel];
+            
+            if (!selectedLevel.unlocked) {
+                btn.classList.add('disabled');
+            } else {
+                btn.classList.remove('disabled');
+            }
+        }
+
+        const container = document.getElementById('levelContainer');
+
+        container.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const currentX = e.touches[0].clientX;
+            const diff = currentX - startX;
+            
+            const track = document.getElementById('levelTrack');
+            const newTranslate = prevTranslate + diff;
+            track.style.transform = `translateX(${newTranslate}px)`;
+        });
+
+        container.addEventListener('touchend', () => {
+            isDragging = false;
+            const track = document.getElementById('levelTrack');
+            const diff = currentTranslate - prevTranslate;
+            
+            if (diff < -50 && currentLevel < levels.length - 1) {
+                const nextLevel = currentLevel + 1;
+                if (levels[nextLevel].unlocked) {
+                    currentLevel = nextLevel;
+                }
+            } else if (diff > 50 && currentLevel > 0) {
+                currentLevel = currentLevel - 1;
+            }
+            
+            updatePosition();
+        });
+
+        container.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const currentX = e.clientX;
+            const diff = currentX - startX;
+            
+            const track = document.getElementById('levelTrack');
+            const newTranslate = prevTranslate + diff;
+            track.style.transform = `translateX(${newTranslate}px)`;
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDragging = false;
+            const diff = currentTranslate - prevTranslate;
+            
+            if (diff < -50 && currentLevel < levels.length - 1) {
+                const nextLevel = currentLevel + 1;
+                if (levels[nextLevel].unlocked) {
+                    currentLevel = nextLevel;
+                }
+            } else if (diff > 50 && currentLevel > 0) {
+                currentLevel = currentLevel - 1;
+            }
+            
+            updatePosition();
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        function confirmLevel() {
+            const selectedLevel = levels[currentLevel];
+            if (!selectedLevel.unlocked) {
+                alert('该关卡尚未解锁！');
+                return;
+            }
+            location.href = 'game-prepare.html?level=' + selectedLevel.id;
+        }
+
+        init();
+    </script>
+</body>
+</html>

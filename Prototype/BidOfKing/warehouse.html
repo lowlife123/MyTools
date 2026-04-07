@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仓库 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 20px;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-bottom: 15px;
+        }
+
+        .back-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 26px;
+            color: white;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn.active {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+        }
+
+        .action-btn.sell-mode {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+        }
+
+        .category-tabs {
+            display: flex;
+            padding: 0 10px;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-tab {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #4a2c00;
+            font-weight: bold;
+            border: none;
+        }
+
+        .content-area {
+            position: absolute;
+            top: 120px;
+            left: 0;
+            right: 0;
+            bottom: 80px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .warehouse-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .grid-cell.highlight {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px dashed #ffd700;
+        }
+
+        .item-slot {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(200, 0, 0, 0.3) 100%);
+            border: 2px solid #ef4444;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .item-slot:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .item-slot.selected {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .item-slot.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #4a2c00;
+            font-weight: bold;
+        }
+
+        .item-icon {
+            font-size: 28px;
+        }
+
+        .item-count {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 1) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .storage-info {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .storage-info span {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .sell-panel {
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sell-panel.active {
+            display: flex;
+        }
+
+        .sell-total {
+            color: #ffd700;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .sell-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sell-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .empty-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .empty-hint span {
+            font-size: 50px;
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="header-top">
+                <div class="back-btn" onclick="location.href='home.html'">
+                    <span>←</span>
+                </div>
+                <div class="header-title">仓库</div>
+                <div class="header-actions">
+                    <div class="action-btn" onclick="sortWarehouse()">整理</div>
+                    <div class="action-btn" id="sellBtn" onclick="toggleSellMode()">出售物品</div>
+                </div>
+            </div>
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="all">全部</div>
+                <div class="category-tab" data-category="electronic">电子物品</div>
+                <div class="category-tab" data-category="material">工具材料</div>
+                <div class="category-tab" data-category="medical">医疗物品</div>
+                <div class="category-tab" data-category="jewelry">珠宝首饰</div>
+            </div>
+        </div>
+
+        <div class="content-area" id="content">
+        </div>
+
+        <div class="bottom-bar">
+            <div class="storage-info">
+                容量: <span id="usedSlots">0</span>/<span id="totalSlots">150</span>
+            </div>
+            <div class="sell-panel" id="sellPanel">
+                <div class="sell-total">总计: 💰<span id="sellTotal">0</span></div>
+                <button class="sell-btn" onclick="sellSelected()">出售</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GRID_COLS = 10;
+        const GRID_ROWS = 15;
+
+        let isSellMode = false;
+        let selectedItems = [];
+        
+        const items = [];
+
+        function canPlaceItem(item, startX, startY, excludeId = null) {
+            if (startX + item.size.w > GRID_COLS || startY + item.size.h > GRID_ROWS) {
+                return false;
+            }
+            
+            for (let placed of items) {
+                if (placed.id === excludeId) continue;
+                if (!(startX >= placed.gridX + placed.size.w || 
+                      startX + item.size.w <= placed.gridX ||
+                      startY >= placed.gridY + placed.size.h || 
+                      startY + item.size.h <= placed.gridY)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function autoArrange() {
+            items.forEach(item => {
+                for (let y = 0; y < GRID_ROWS; y++) {
+                    for (let x = 0; x < GRID_COLS; x++) {
+                        if (canPlaceItem(item, x, y, item.id)) {
+                            item.gridX = x;
+                            item.gridY = y;
+                            return;
+                        }
+                    }
+                }
+            });
+        }
+
+        function sortWarehouse() {
+            items.sort((a, b) => b.price - a.price);
+            autoArrange();
+            renderWarehouse();
+        }
+
+        function toggleSellMode() {
+            isSellMode = !isSellMode;
+            const sellBtn = document.getElementById('sellBtn');
+            const sellPanel = document.getElementById('sellPanel');
+            
+            if (isSellMode) {
+                sellBtn.classList.add('active');
+                sellBtn.textContent = '取消出售';
+                sellPanel.classList.add('active');
+                selectedItems = [];
+            } else {
+                sellBtn.classList.remove('active');
+                sellBtn.textContent = '出售物品';
+                sellPanel.classList.remove('active');
+                selectedItems = [];
+            }
+            renderWarehouse();
+            updateSellTotal();
+        }
+
+        function toggleItemSelection(itemId) {
+            if (!isSellMode) return;
+            
+            const index = selectedItems.indexOf(itemId);
+            if (index > -1) {
+                selectedItems.splice(index, 1);
+            } else {
+                selectedItems.push(itemId);
+            }
+            renderWarehouse();
+            updateSellTotal();
+        }
+
+        function updateSellTotal() {
+            const total = items
+                .filter(item => selectedItems.includes(item.id))
+                .reduce((sum, item) => sum + item.price * item.count, 0);
+            document.getElementById('sellTotal').textContent = total.toLocaleString();
+        }
+
+        function sellSelected() {
+            if (selectedItems.length === 0) return;
+            
+            if (confirm(`确定出售选中的 ${selectedItems.length} 件物品吗？`)) {
+                const sellValue = items
+                    .filter(item => selectedItems.includes(item.id))
+                    .reduce((sum, item) => sum + item.price * item.count, 0);
+                
+                for (let i = items.length - 1; i >= 0; i--) {
+                    if (selectedItems.includes(items[i].id)) {
+                        items.splice(i, 1);
+                    }
+                }
+                
+                alert(`出售成功！获得 💰${sellValue.toLocaleString()}`);
+                selectedItems = [];
+                toggleSellMode();
+                autoArrange();
+                renderWarehouse();
+            }
+        }
+
+        function renderWarehouse(category = 'all') {
+            const content = document.getElementById('content');
+            const filteredItems = category === 'all' 
+                ? items 
+                : items.filter(item => item.category === category);
+            
+            let usedSlots = 0;
+            items.forEach(item => {
+                usedSlots += item.size.w * item.size.h;
+            });
+
+            document.getElementById('usedSlots').textContent = usedSlots;
+
+            let html = '<div class="warehouse-grid">';
+            
+            for (let y = 0; y < GRID_ROWS; y++) {
+                for (let x = 0; x < GRID_COLS; x++) {
+                    html += `<div class="grid-cell"></div>`;
+                }
+            }
+            
+            html += '</div>';
+            
+            content.innerHTML = html;
+        }
+
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                renderWarehouse(this.dataset.category);
+            });
+        });
+
+        autoArrange();
+        renderWarehouse();
+    </script>
+</body>
+</html>

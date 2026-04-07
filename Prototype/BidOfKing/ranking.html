@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排行榜 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 140px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 15px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 26px;
+            color: white;
+        }
+
+        .page-title {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .category-tabs {
+            position: absolute;
+            top: 95px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 0 15px;
+        }
+
+        .category-tab {
+            padding: 10px 35px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .category-tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #4a2c00;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .content-area {
+            position: absolute;
+            top: 145px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1.5fr;
+            padding: 20px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-header span {
+            text-align: center;
+        }
+
+        .table-header span:first-child {
+            text-align: left;
+        }
+
+        .ranking-list {
+            padding: 10px 0;
+        }
+
+        .ranking-item {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1.5fr;
+            padding: 18px 15px;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .ranking-item:nth-child(1) .rank-num {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #4a2c00;
+        }
+
+        .ranking-item:nth-child(2) .rank-num {
+            background: linear-gradient(135deg, #c0c0c0 0%, #a0a0a0 100%);
+            color: #333;
+        }
+
+        .ranking-item:nth-child(3) .rank-num {
+            background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%);
+            color: #333;
+        }
+
+        .rank-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-left: 10px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .user-name {
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .user-level {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .coin-amount {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .my-rank {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 1) 100%);
+            padding: 20px 15px;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1.5fr;
+            align-items: center;
+            border-top: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .my-rank .rank-num {
+            background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+            color: white;
+        }
+
+        .my-rank .user-name {
+            color: #ffd700;
+        }
+
+        .my-rank .coin-amount {
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="back-btn" onclick="location.href='home.html'">
+                <span>←</span>
+            </div>
+            <div class="page-title">排行榜</div>
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="all">全服</div>
+                <div class="category-tab" data-category="province">全省</div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="table-header">
+                <span>排名</span>
+                <span style="text-align: center;">用户名</span>
+                <span>金币量</span>
+            </div>
+            <div class="ranking-list" id="rankingList">
+            </div>
+        </div>
+
+        <div class="my-rank">
+            <div class="rank-num">25</div>
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <div>
+                    <div class="user-name">我的账号</div>
+                    <div class="user-level">Lv.25</div>
+                </div>
+            </div>
+            <div class="coin-amount">1,280,500</div>
+        </div>
+    </div>
+
+    <script>
+        const allServerRankings = [
+            { rank: 1, name: '竞价王者', avatar: '👑', level: 50, coins: 99999999 },
+            { rank: 2, name: '富甲天下', avatar: '💎', level: 48, coins: 88888888 },
+            { rank: 3, name: '拍卖神话', avatar: '🏆', level: 45, coins: 77777777 },
+            { rank: 4, name: '金币大亨', avatar: '💰', level: 42, coins: 55555555 },
+            { rank: 5, name: '收藏家', avatar: '📦', level: 40, coins: 44444444 },
+            { rank: 6, name: '竞价高手', avatar: '🎯', level: 38, coins: 33333333 },
+            { rank: 7, name: '财富自由', avatar: '🌟', level: 35, coins: 22222222 },
+            { rank: 8, name: '宝贝猎人', avatar: '🔍', level: 32, coins: 18000000 },
+            { rank: 9, name: '投资达人', avatar: '📈', level: 30, coins: 15000000 },
+            { rank: 10, name: '淘宝专家', avatar: '🛒', level: 28, coins: 12000000 },
+            { rank: 11, name: '竞标新人', avatar: '🎓', level: 25, coins: 8000000 },
+            { rank: 12, name: '小白玩家', avatar: '🐣', level: 20, coins: 5000000 },
+            { rank: 13, name: '新手小白', avatar: '🌱', level: 15, coins: 2000000 },
+            { rank: 14, name: '尝试一下', avatar: '🤔', level: 10, coins: 1000000 },
+            { rank: 15, name: '刚入门', avatar: '👶', level: 5, coins: 100000 }
+        ];
+
+        const provinceRankings = [
+            { rank: 1, name: '省城首富', avatar: '🏙️', level: 45, coins: 55555555 },
+            { rank: 2, name: '本地大佬', avatar: '🎩', level: 42, coins: 40000000 },
+            { rank: 3, name: '省内高手', avatar: '⚡', level: 38, coins: 28000000 },
+            { rank: 4, name: '省城买家', avatar: '🛍️', level: 35, coins: 20000000 },
+            { rank: 5, name: '当地名人', avatar: '⭐', level: 32, coins: 15000000 },
+            { rank: 6, name: '市区达人', avatar: '🌆', level: 28, coins: 10000000 },
+            { rank: 7, name: '城里玩家', avatar: '🏘️', level: 25, coins: 7000000 },
+            { rank: 8, name: '小镇富商', avatar: '🏪', level: 22, coins: 5000000 },
+            { rank: 9, name: '本地买家', avatar: '🏠', level: 18, coins: 3000000 },
+            { rank: 10, name: '省城新人', avatar: '🌱', level: 15, coins: 1500000 }
+        ];
+
+        function renderRanking(data) {
+            const list = document.getElementById('rankingList');
+            let html = '';
+            
+            data.forEach(item => {
+                html += `
+                    <div class="ranking-item">
+                        <div class="rank-num">${item.rank}</div>
+                        <div class="user-info">
+                            <div class="user-avatar">${item.avatar}</div>
+                            <div>
+                                <div class="user-name">${item.name}</div>
+                                <div class="user-level">Lv.${item.level}</div>
+                            </div>
+                        </div>
+                        <div class="coin-amount">${item.coins.toLocaleString()}</div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                if (this.dataset.category === 'all') {
+                    renderRanking(allServerRankings);
+                } else {
+                    renderRanking(provinceRankings);
+                }
+            });
+        });
+
+        renderRanking(allServerRankings);
+    </script>
+</body>
+</html>

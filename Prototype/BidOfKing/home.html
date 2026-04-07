@@ -61,6 +61,13 @@
             font-size: 16px;
             font-weight: bold;
             box-shadow: 0 3px 8px rgba(245, 87, 108, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-badge:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.6);
         }
 
         .coins-display {
@@ -135,7 +142,7 @@
 
         .gallery-btn {
             position: absolute;
-            bottom: 540px;
+            bottom: 260px;
             left: 20px;
             width: 90px;
             height: 90px;
@@ -149,6 +156,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid rgba(255, 255, 255, 0.3);
+            z-index: 50;
         }
 
         .gallery-btn:hover {
@@ -169,7 +177,7 @@
 
         .role-btn {
             position: absolute;
-            bottom: 440px;
+            bottom: 160px;
             left: 20px;
             width: 90px;
             height: 90px;
@@ -183,6 +191,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid rgba(255, 255, 255, 0.3);
+            z-index: 50;
         }
 
         .role-btn:hover {
@@ -203,8 +212,8 @@
 
         .rank-btn {
             position: absolute;
-            bottom: 340px;
-            left: 20px;
+            bottom: 160px;
+            right: 20px;
             width: 90px;
             height: 90px;
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -217,6 +226,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid rgba(255, 255, 255, 0.3);
+            z-index: 50;
         }
 
         .rank-btn:hover {
@@ -244,6 +254,7 @@
             justify-content: center;
             align-items: center;
             padding: 0 20px;
+            z-index: 100;
         }
 
         .nav-btn {
@@ -396,12 +407,12 @@
             <span class="gallery-text">展览馆</span>
         </div>
 
-        <div class="role-btn">
+        <div class="role-btn" onclick="location.href='character.html'">
             <span class="role-icon">🎭</span>
             <span class="role-text">角色</span>
         </div>
 
-        <div class="rank-btn">
+        <div class="rank-btn" onclick="location.href='ranking.html'">
             <span class="rank-icon">🏆</span>
             <span class="rank-text">排行榜</span>
         </div>
@@ -412,12 +423,12 @@
                 <span class="text">图鉴</span>
             </div>
 
-            <div class="nav-btn start-btn">
+            <div class="nav-btn start-btn" onclick="location.href='select-level.html'">
                 <span class="icon">🎯</span>
                 <span class="text">开始竞拍</span>
             </div>
 
-            <div class="nav-btn side-btn">
+            <div class="nav-btn side-btn" onclick="location.href='warehouse.html'">
                 <span class="icon">📦</span>
                 <span class="text">仓库</span>
             </div>

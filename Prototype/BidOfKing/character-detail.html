@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色详情 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 26px;
+            color: white;
+        }
+
+        .page-title {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-area {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .character-name {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .character-portrait {
+            width: 100%;
+            height: 280px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-portrait::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .character-avatar-large {
+            font-size: 140px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 6px;
+            height: 20px;
+            background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
+            border-radius: 3px;
+        }
+
+        .description {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 15px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .skill-card {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.1) 100%);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .skill-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .skill-icon {
+            font-size: 24px;
+        }
+
+        .skill-desc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #1a1a2e;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-ad {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-ad:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-owned {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            cursor: default;
+        }
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        .owned-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="back-btn" onclick="location.href='character.html'">
+                <span>←</span>
+            </div>
+            <div class="page-title">角色详情</div>
+        </div>
+
+        <div class="content-area" id="contentArea">
+        </div>
+    </div>
+
+    <script>
+        const characters = [
+            { 
+                id: 1, 
+                name: '珠宝商人', 
+                avatar: '💎', 
+                owned: true,
+                description: '一位在珠宝行业摸爬滚打数十年的老手，拥有敏锐的鉴别眼光和丰富的行业人脉。擅长发现被低估的珠宝首饰，在竞价场上鲜有失手。',
+                skills: [
+                    { name: '慧眼识珠', icon: '🔍', desc: '鉴定珠宝时，成功率提升30%' },
+                    { name: '人脉广泛', icon: '🤝', desc: '竞拍时可额外获得10%的时间加成' }
+                ],
+                price: 0
+            },
+            { 
+                id: 2, 
+                name: '废品收集者', 
+                avatar: '♻️', 
+                owned: true,
+                description: '从废品站起家的传奇人物，擅长在垃圾堆中发现隐藏的宝藏。虽然外表邋遢，但眼光独到，总能在不起眼的物品中发现价值。',
+                skills: [
+                    { name: '变废为宝', icon: '✨', desc: '普通物品有5%概率变为稀有物品' },
+                    { name: '淘宝达人', icon: '🛍️', desc: '每日可在废品区额外搜索一次' }
+                ],
+                price: 0
+            },
+            { 
+                id: 3, 
+                name: '考古专家', 
+                avatar: '🏺', 
+                owned: true,
+                description: '著名的考古学者，擅长鉴别古代文物。对历史有着深厚的造诣，能够准确判断文物的年代和价值，是拍卖场的常客。',
+                skills: [
+                    { name: '年代鉴定', icon: '📜', desc: '可查看物品的准确年代信息' },
+                    { name: '文物专家', icon: '🏛️', desc: '古代文物竞价成功率提升25%' }
+                ],
+                price: 0
+            },
+            { 
+                id: 4, 
+                name: '收藏家', 
+                avatar: '🎨', 
+                owned: true,
+                description: '一位疯狂的收藏爱好者，藏品涵盖各个领域。从艺术品到古玩，从邮票到钱币，无所不包。极度追求完美组合。',
+                skills: [
+                    { name: '收藏大师', icon: '📚', desc: '收集指定系列物品时，所需数量减少1' },
+                    { name: '珍品雷达', icon: '📡', desc: '有更高概率发现珍稀物品' }
+                ],
+                price: 0
+            },
+            { 
+                id: 5, 
+                name: '军事爱好者', 
+                avatar: '🎖️', 
+                owned: true,
+                description: '对军事装备了如指掌的狂热爱好者，尤其擅长鉴别各类军事收藏品。军火库中的每一件藏品都有其独特的故事。',
+                skills: [
+                    { name: '军事专家', icon: '⚔️', desc: '军事藏品竞价必得成功' },
+                    { name: '情报网络', icon: '📡', desc: '可提前得知即将拍卖的军事藏品' }
+                ],
+                price: 0
+            },
+            { 
+                id: 6, 
+                name: '财富大亨', 
+                avatar: '💰', 
+                owned: false,
+                description: '顶级富豪榜上的常客，拥有无尽的财富。行事低调，但出手阔绰。传说他收藏的珍宝可以装满一个博物馆。',
+                skills: [
+                    { name: '金钱帝国', icon: '💵', desc: '竞价时无资金上限' },
+                    { name: ' VIP特权', icon: '👑', desc: '所有拍卖行手续费全免' }
+                ],
+                price: 500000
+            },
+            { 
+                id: 7, 
+                name: '粗鲁竞拍手', 
+                avatar: '🔨', 
+                owned: false,
+                description: '拍卖场上的传奇人物，以其独特的竞价风格著称。虽然举止粗鲁，但总能以意想不到的价格拿下珍品。',
+                skills: [
+                    { name: '心理战术', icon: '🧠', desc: '竞价时对手有15%概率退缩' },
+                    { name: '最后通牒', icon: '⏰', desc: '最后10秒内竞价，成功率提升20%' }
+                ],
+                price: 300000
+            },
+            { 
+                id: 8, 
+                name: '医生', 
+                avatar: '⚕️', 
+                owned: false,
+                description: '一位德高望重的医生，同时也是医学史料的收藏家。对古代医疗器械和医学典籍有着独特的偏好。',
+                skills: [
+                    { name: '健康保障', icon: '💊', desc: '竞拍失败后立即恢复5%体力' },
+                    { name: '医药百科', icon: '📖', desc: '医学类物品鉴定成功率100%' }
+                ],
+                price: 250000
+            },
+            { 
+                id: 9, 
+                name: '私家侦探', 
+                avatar: '🔍', 
+                owned: false,
+                description: '神秘的情报专家，擅长调查和取证。对各类神秘物品和失踪文物有独特的追踪能力，是许多收藏家的幕后帮手。',
+                skills: [
+                    { name: '追踪术', icon: '🗺️', desc: '可查询任意物品的历任所有者' },
+                    { name: '情报分析', icon: '💡', desc: '竞拍前可查看对手的心理价位' }
+                ],
+                price: 400000
+            },
+            { 
+                id: 10, 
+                name: '法国赌神', 
+                avatar: '🃏', 
+                owned: false,
+                description: '来自法国的传奇赌徒，在欧洲各大赌场留下无数传说。擅长概率计算和心理博弈，将赌场哲学应用到竞价中。',
+                skills: [
+                    { name: '概率大师', icon: '🎲', desc: '可预测下一件拍品的价值区间' },
+                    { name: '幸运女神', icon: '🍀', desc: '每日首次竞价失败，可获得一次免费重拍机会' }
+                ],
+                price: 600000
+            }
+        ];
+
+        function getCharacterId() {
+            const params = new URLSearchParams(window.location.search);
+            return parseInt(params.get('id')) || 1;
+        }
+
+        function renderCharacterDetail() {
+            const charId = getCharacterId();
+            const char = characters.find(c => c.id === charId) || characters[0];
+            const contentArea = document.getElementById('contentArea');
+
+            let buttonsHtml = '';
+            if (char.owned) {
+                buttonsHtml = `
+                    <div class="action-btn btn-owned">
+                        <span class="btn-icon">✓</span>
+                        已拥有
+                    </div>
+                `;
+            } else {
+                buttonsHtml = `
+                    <div class="action-btn btn-gold" onclick="buyWithGold(${char.id})">
+                        <span class="btn-icon">💰</span>
+                        金币购买 (${char.price.toLocaleString()})
+                    </div>
+                    <div class="action-btn btn-ad" onclick="unlockWithAd(${char.id})">
+                        <span class="btn-icon">📺</span>
+                        看广告免费解锁
+                    </div>
+                `;
+            }
+
+            let skillsHtml = '';
+            char.skills.forEach(skill => {
+                skillsHtml += `
+                    <div class="skill-card">
+                        <div class="skill-name">
+                            <span class="skill-icon">${skill.icon}</span>
+                            ${skill.name}
+                        </div>
+                        <div class="skill-desc">${skill.desc}</div>
+                    </div>
+                `;
+            });
+
+            const ownedBadge = char.owned ? '<div class="owned-badge">✓ 已拥有</div>' : '';
+
+            contentArea.innerHTML = `
+                <div class="character-portrait">
+                    ${ownedBadge}
+                    <div class="character-avatar-large">${char.avatar}</div>
+                </div>
+                
+                <div class="character-name">${char.name}</div>
+                
+                <div class="section">
+                    <div class="section-title">角色简介</div>
+                    <div class="description">${char.description}</div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">角色技能</div>
+                    ${skillsHtml}
+                </div>
+                
+                <div class="button-group">
+                    ${buttonsHtml}
+                </div>
+            `;
+        }
+
+        function buyWithGold(charId) {
+            const char = characters.find(c => c.id === charId);
+            if (confirm(`确认花费 ${char.price.toLocaleString()} 金币购买 ${char.name} 吗？`)) {
+                alert('购买成功！');
+                location.href = 'character.html';
+            }
+        }
+
+        function unlockWithAd(charId) {
+            alert('即将播放广告...');
+            setTimeout(() => {
+                alert('广告播放完成！角色解锁成功！');
+                location.href = 'character.html';
+            }, 2000);
+        }
+
+        renderCharacterDetail();
+    </script>
+</body>
+</html>
