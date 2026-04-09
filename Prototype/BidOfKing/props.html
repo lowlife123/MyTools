@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>道具 - BidOfKing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-frame {
+            width: 540px;
+            height: 960px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.8) 100%);
+            z-index: 100;
+            padding-top: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .back-btn span {
+            font-size: 26px;
+            color: white;
+        }
+
+        .page-title {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .content-area {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .content-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .props-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 6px;
+            height: 20px;
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            border-radius: 3px;
+        }
+
+        .props-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .prop-card {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .prop-card:hover {
+            transform: scale(1.05);
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .prop-icon {
+            font-size: 38px;
+            margin-bottom: 6px;
+        }
+
+        .prop-name {
+            font-size: 12px;
+            color: white;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .prop-count {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 8px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .prop-refresh {
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 4px;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            margin: 25px 0;
+        }
+
+        .gift-section {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 140, 0, 0.15) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .gift-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .gift-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .gift-icon {
+            font-size: 28px;
+        }
+
+        .gift-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .gift-item {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .gift-item:hover:not(.locked):not(.claimed) {
+            transform: scale(1.05);
+            border-color: #ffd700;
+        }
+
+        .gift-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .gift-item.claimed {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .gift-item .lock-icon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 14px;
+        }
+
+        .gift-item .time-hint {
+            position: absolute;
+            bottom: 6px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .gift-item .icon {
+            font-size: 32px;
+        }
+
+        .gift-item .name {
+            font-size: 12px;
+            color: white;
+            margin-top: 4px;
+        }
+
+        .gift-item .reward {
+            font-size: 10px;
+            color: #ffd700;
+            margin-top: 2px;
+        }
+
+        .gift-item.ad-gift {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .gift-item.ad-gift:hover:not(.locked):not(.claimed) {
+            border-color: #ef4444;
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .ad-tag {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="header">
+            <div class="back-btn" onclick="location.href='home.html'">
+                <span>←</span>
+            </div>
+            <div class="page-title">道具</div>
+        </div>
+
+        <div class="content-area" id="content">
+        </div>
+    </div>
+
+    <script>
+        const propsList = [
+            { id: 1, name: '竞价增幅', icon: '📈', count: 5, refreshTime: 2 },
+            { id: 2, name: '幸运光环', icon: '🍀', count: 3, refreshTime: 4 },
+            { id: 3, name: '透视镜', icon: '🔭', count: 2, refreshTime: 6 },
+            { id: 4, name: '时间延长', icon: '⏰', count: 4, refreshTime: 8 },
+            { id: 5, name: '双倍金币', icon: '💰', count: 1, refreshTime: 12 },
+            { id: 6, name: '万能钥匙', icon: '🔑', count: 2, refreshTime: 24 }
+        ];
+
+        function formatRefreshTime(hours) {
+            if (hours >= 24) {
+                const d = Math.floor(hours / 24);
+                const h = hours % 24;
+                return d + '天' + h + '小时';
+            } else if (hours >= 1) {
+                const h = Math.floor(hours);
+                const m = Math.floor((hours - h) * 60);
+                return h + '小时' + m + '分钟';
+            } else {
+                const m = Math.floor(hours * 60);
+                return m + '分钟';
+            }
+        }
+
+        function renderProps() {
+            let html = '<div class="props-section">';
+            html += '<div class="section-title">我的道具</div>';
+            html += '<div class="props-grid">';
+            propsList.forEach(function(prop) {
+                var refreshText = '还有' + formatRefreshTime(prop.refreshTime) + '补充*1';
+                html += '<div class="prop-card">' +
+                    '<span class="prop-count">x' + prop.count + '</span>' +
+                    '<span class="prop-icon">' + prop.icon + '</span>' +
+                    '<span class="prop-name">' + prop.name + '</span>' +
+                    '<span class="prop-refresh">' + refreshText + '</span>' +
+                    '</div>';
+            });
+            html += '</div></div>';
+            return html;
+        }
+
+        const giftBoxes = [
+            { id: 1, name: '新手礼包', icon: '📦', rewards: ['📈','🧪'], time: '10分钟', unlocked: true, claimed: false },
+            { id: 2, name: '时长礼包', icon: '⏱️', rewards: ['🍀','🔭','🥤'], time: '1小时', unlocked: false, claimed: false },
+            { id: 3, name: '活跃礼包', icon: '🔥', rewards: ['📈','🍀','🔭','⏰'], time: '3小时', unlocked: false, claimed: false },
+            { id: 4, name: '肝帝礼包', icon: '🏃', rewards: ['💰','💎','🎫','🧪','🍀'], time: '6小时', unlocked: false, claimed: false },
+            { id: 5, name: '坚持礼包', icon: '💪', rewards: ['💎','🎁','📈','🍀','🔭','⏰'], time: '12小时', unlocked: false, claimed: false },
+            { id: 6, name: '广告礼包', icon: '🎁', rewards: ['💎','💎','💎','🎁','📈','🍀','🔭'], time: '看广告', unlocked: true, claimed: false, isAd: true }
+        ];
+
+        const rewardNames = {
+            '📈': '竞价增幅', '🍀': '幸运光环', '🔭': '透视镜', '⏰': '时间延长',
+            '💰': '金币', '💎': '钻石', '🎫': '抽奖券', '🧪': '恢复药剂', '🥤': '能量饮料', '🎁': '万能钥匙'
+        };
+
+        let onlineTime = 35;
+
+        function getUnlockStatus(box) {
+            if (box.isAd) return { locked: false };
+            if (box.id === 1 && onlineTime >= 10) return { locked: false };
+            if (box.id === 2 && onlineTime >= 60) return { locked: false };
+            if (box.id === 3 && onlineTime >= 180) return { locked: false };
+            if (box.id === 4 && onlineTime >= 360) return { locked: false };
+            if (box.id === 5 && onlineTime >= 720) return { locked: false };
+            return { locked: true };
+        }
+
+        function renderGiftBoxes() {
+            let html = '<div class="gift-section">';
+            html += '<div class="gift-header">';
+            html += '<div class="gift-title"><span class="gift-icon">🎁</span>道具礼包</div>';
+            html += '</div>';
+            html += '<div class="gift-grid">';
+            
+            giftBoxes.forEach(function(box) {
+                var status = getUnlockStatus(box);
+                var classes = 'gift-item';
+                if (status.locked) classes += ' locked';
+                else if (box.claimed) classes += ' claimed';
+                if (box.isAd) classes += ' ad-gift';
+                
+                var clickHandler = box.isAd ? 'watchAd()' : (status.locked ? '' : 'claimGift(' + box.id + ')');
+                
+                var iconDisplay = box.claimed ? '✅' : box.icon;
+                
+                html += '<div class="' + classes + '" onclick="' + clickHandler + '">';
+                if (box.isAd) html += '<span class="ad-tag">广告</span>';
+                if (status.locked && !box.isAd) html += '<span class="lock-icon">🔒</span>';
+                html += '<span class="icon">' + iconDisplay + '</span>';
+                html += '<span class="name">' + box.name + '</span>';
+                html += '<span class="reward">' + box.rewards.length + '种道具</span>';
+                if (status.locked && !box.isAd) html += '<span class="time-hint">' + box.time + '</span>';
+                html += '</div>';
+            });
+            
+            html += '</div></div>';
+            return html;
+        }
+
+        function claimGift(id) {
+            const box = giftBoxes.find(function(g) { return g.id === id; });
+            if (box && !box.claimed && !getUnlockStatus(box).locked) {
+                box.claimed = true;
+                const randomRewards = [];
+                const rewardCount = Math.min(3, box.rewards.length);
+                const shuffled = box.rewards.slice().sort(function() { return Math.random() - 0.5; });
+                for (let i = 0; i < rewardCount; i++) {
+                    randomRewards.push(shuffled[i % shuffled.length]);
+                }
+                const rewardText = randomRewards.map(function(r) { return r + rewardNames[r]; }).join('、');
+                alert('恭喜获得: ' + rewardText);
+                render();
+            }
+        }
+
+        function watchAd() {
+            const box = giftBoxes.find(function(g) { return g.isAd; });
+            if (box && !box.claimed) {
+                if (confirm('观看广告可领取丰厚奖励！是否观看？')) {
+                    box.claimed = true;
+                    const randomRewards = [];
+                    const rewardCount = 5;
+                    const shuffled = box.rewards.slice().sort(function() { return Math.random() - 0.5; });
+                    for (let i = 0; i < rewardCount; i++) {
+                        randomRewards.push(shuffled[i % shuffled.length]);
+                    }
+                    const rewardText = randomRewards.map(function(r) { return r + rewardNames[r]; }).join('、');
+                    alert('恭喜获得: ' + rewardText);
+                    render();
+                }
+            }
+        }
+
+        function render() {
+            document.getElementById('content').innerHTML = renderProps() + '<div class="divider"></div>' + renderGiftBoxes();
+        }
+
+        render();
+    </script>
+</body>
+</html>

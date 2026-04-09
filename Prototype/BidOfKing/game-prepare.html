@@ -277,72 +277,16 @@
             padding: 8px;
         }
 
-        .prop-skill-info {
-            background: rgba(59, 130, 246, 0.08);
-            border-radius: 10px;
-            padding: 10px;
-            border: 1px solid rgba(59, 130, 246, 0.15);
-            margin-bottom: 12px;
-            min-height: 60px;
-        }
-
-        .prop-skill-info-title {
-            font-size: 11px;
-            color: #60a5fa;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .prop-skill-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-
-        .prop-skill-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .prop-skill-icon {
-            font-size: 14px;
-        }
-
-        .prop-skill-name {
-            font-size: 11px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .prop-skill-desc {
-            font-size: 9px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .props-section {
-            opacity: 0.7;
-        }
-
         .props-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
         }
 
-        .prop-card-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-        }
-
         .prop-card {
-            width: 100%;
             aspect-ratio: 1;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
@@ -354,25 +298,23 @@
             position: relative;
         }
 
-        .prop-card:hover {
+        .prop-card:hover:not(.zero-owned) {
             border-color: rgba(255, 215, 0, 0.4);
             background: rgba(255, 215, 0, 0.08);
         }
 
-        .prop-card.has-quantity {
-            border-color: rgba(255, 215, 0, 0.5);
-            background: rgba(255, 215, 0, 0.1);
+        .prop-card.equipped {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
         }
 
-        .prop-card.selected {
-            border-color: #60a5fa;
-            background: rgba(59, 130, 246, 0.15);
+        .prop-card.zero-owned {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         .prop-card .icon {
-            font-size: 45px;
-            position: relative;
-            flex: 1;
+            font-size: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -386,87 +328,71 @@
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100%;
-            height: 20%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
         }
 
-        .prop-card .owned-count {
-            font-size: 9px;
-            color: #ffd700;
-            font-weight: bold;
-        }
-
-        .prop-card.zero-owned {
-            opacity: 0.5;
-        }
-
-        .prop-card.zero-owned .owned-count {
-            color: #ef4444;
-        }
-
-        .quantity-badge {
+        .equip-badge {
             position: absolute;
-            top: -4px;
-            right: -4px;
-            min-width: 18px;
-            height: 18px;
+            top: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 16px;
             font-weight: bold;
             color: white;
             border: 2px solid rgba(0, 0, 0, 0.3);
+            z-index: 10;
         }
 
-        .prop-controls {
-            display: flex;
-            justify-content: center;
-            gap: 4px;
-            width: 100%;
+        .tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.98) 0%, rgba(15, 52, 96, 0.98) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 12px;
+            padding: 12px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            min-width: 180px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         }
 
-        .prop-btn {
-            flex: 1;
-            height: 18px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-title {
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
-        .prop-btn.minus {
-            background: rgba(239, 68, 68, 0.9);
+        .tooltip-icon {
+            font-size: 28px;
+        }
+
+        .tooltip-name {
+            font-size: 16px;
+            font-weight: bold;
             color: white;
         }
 
-        .prop-btn.plus {
-            background: rgba(34, 197, 94, 0.9);
-            color: white;
+        .tooltip-desc {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
         }
 
-        .prop-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .prop-btn.disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            background: #666 !important;
-        }
-
-        .prop-btn.disabled:hover {
-            transform: none;
+        .tooltip-owned {
+            font-size: 11px;
+            color: #ffd700;
+            font-weight: bold;
         }
 
         .bottom-bar {
@@ -549,15 +475,9 @@
                 </div>
             </div>
 
-            <div class="section props-section">
-                <div class="section-title">携带道具 (已选 <span id="selectedCount">0</span>/3)</div>
-                <div class="props-grid" id="propsGrid">
-                </div>
-            </div>
-
             <div class="section">
-                <div class="prop-skill-info" id="propSkillInfo">
-                    <div class="skill-empty">选择一个道具查看详情</div>
+                <div class="section-title">携带道具 (<span id="selectedCount">0</span>/3)</div>
+                <div class="props-grid" id="propsGrid">
                 </div>
             </div>
         </div>
@@ -567,6 +487,15 @@
             <button class="start-btn" id="startBtn" onclick="startGame()">
                 <span>开始竞拍</span>
             </button>
+        </div>
+
+        <div class="tooltip" id="tooltip">
+            <div class="tooltip-title">
+                <span class="tooltip-icon" id="tooltipIcon"></span>
+                <span class="tooltip-name" id="tooltipName"></span>
+            </div>
+            <div class="tooltip-desc" id="tooltipDesc"></div>
+            <div class="tooltip-owned" id="tooltipOwned"></div>
         </div>
     </div>
 
@@ -656,8 +585,11 @@
 
         let currentLevel = 1;
         let selectedCharacter = 2;
-        let selectedProp = null;
-        let propQuantities = {};
+        let equippedProps = [];
+
+        let longPressTimer = null;
+        let isLongPress = false;
+        let tooltipTimeout = null;
 
         function init() {
             const params = new URLSearchParams(window.location.search);
@@ -672,7 +604,6 @@
             renderCharacters();
             renderSkillInfo(2);
             renderProps();
-            renderPropSkillInfo(null);
             updateStartButton();
         }
 
@@ -695,83 +626,103 @@
         function renderProps() {
             const container = document.getElementById('propsGrid');
             let html = '';
-            const totalProps = Object.values(propQuantities).reduce((a, b) => a + b, 0);
             
             props.forEach(prop => {
-                const qty = propQuantities[prop.id] || 0;
-                const hasQtyClass = qty > 0 ? 'has-quantity' : '';
-                const selectedClass = selectedProp === prop.id ? 'selected' : '';
+                const isEquipped = equippedProps.includes(prop.id);
+                const equippedClass = isEquipped ? 'equipped' : '';
                 const zeroClass = prop.owned === 0 ? 'zero-owned' : '';
                 
-                const minusDisabled = qty <= 0 ? 'disabled' : '';
-                const plusDisabled = totalProps >= 3 || prop.owned === 0 ? 'disabled' : '';
-                
                 html += `
-                    <div class="prop-card-wrapper">
-                        <div class="prop-card ${hasQtyClass} ${selectedClass} ${zeroClass}" onclick="selectProp(${prop.id})">
-                            <div class="icon">
-                                ${prop.icon}
-                                ${qty > 0 ? `<div class="quantity-badge">${qty}</div>` : ''}
-                            </div>
-                            <div class="name">${prop.name} * <span class="owned-count">${prop.owned}</span></div>
-                        </div>
-                        <div class="prop-controls">
-                            <button class="prop-btn minus ${minusDisabled}" onclick="event.stopPropagation(); changePropQty(${prop.id}, -1)">-</button>
-                            <button class="prop-btn plus ${plusDisabled}" onclick="event.stopPropagation(); changePropQty(${prop.id}, 1)">+</button>
-                        </div>
+                    <div class="prop-card ${equippedClass} ${zeroClass}" 
+                         onclick="handlePropClick(${prop.id})"
+                         onmousedown="startLongPress(event, ${prop.id})"
+                         onmouseup="cancelLongPress()"
+                         onmouseleave="cancelLongPress()"
+                         ontouchstart="startLongPress(event, ${prop.id})"
+                         ontouchend="cancelLongPress()">
+                        ${isEquipped ? '<div class="equip-badge">-</div>' : ''}
+                        <div class="icon">${prop.icon}</div>
+                        <div class="name">${prop.name}</div>
                     </div>
                 `;
             });
             container.innerHTML = html;
-            document.getElementById('selectedCount').textContent = totalProps;
         }
 
-        function selectProp(propId) {
-            selectedProp = propId;
-            renderProps();
-            renderPropSkillInfo(propId);
-        }
-
-        function renderPropSkillInfo(propId) {
-            const container = document.getElementById('propSkillInfo');
-            const prop = props.find(p => p.id === propId);
-            
-            if (!prop) {
-                container.innerHTML = '<div class="skill-empty">选择一个道具查看详情</div>';
-                return;
-            }
-
-            container.innerHTML = `
-                <div class="prop-skill-info-title">📦 道具详情</div>
-                <div class="prop-skill-item">
-                    <span class="prop-skill-icon">${prop.icon}</span>
-                    <span class="prop-skill-name">${prop.name}</span>
-                    <span class="prop-skill-desc"> | 拥有: ${prop.owned}</span>
-                </div>
-                <div class="prop-skill-item">
-                    <span class="prop-skill-desc">${prop.desc}</span>
-                </div>
-            `;
-        }
-
-        function changePropQty(propId, delta) {
+        function toggleProp(propId) {
             const prop = props.find(p => p.id === propId);
             if (!prop || prop.owned === 0) return;
             
-            const currentQty = propQuantities[propId] || 0;
-            const totalProps = Object.values(propQuantities).reduce((a, b) => a + b, 0);
-            
-            if (delta > 0) {
-                if (totalProps >= 3) return;
-                if (currentQty >= prop.owned) return;
-                propQuantities[propId] = currentQty + 1;
+            const index = equippedProps.indexOf(propId);
+            if (index > -1) {
+                equippedProps.splice(index, 1);
             } else {
-                if (currentQty <= 0) return;
-                propQuantities[propId] = currentQty - 1;
-                if (propQuantities[propId] === 0) delete propQuantities[propId];
+                if (equippedProps.length < 3) {
+                    equippedProps.push(propId);
+                }
             }
             
             renderProps();
+            updateStartButton();
+        }
+
+        function startLongPress(event, propId) {
+            event.preventDefault();
+            event.stopPropagation();
+            isLongPress = false;
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                showTooltip(propId, event);
+            }, 500);
+        }
+
+        function cancelLongPress() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            setTimeout(() => { isLongPress = false; }, 100);
+            hideTooltip();
+        }
+
+        function handlePropClick(propId) {
+            if (isLongPress) return;
+            toggleProp(propId);
+        }
+
+        function showTooltip(propId, event) {
+            const prop = props.find(p => p.id === propId);
+            if (!prop) return;
+            
+            const tooltip = document.getElementById('tooltip');
+            document.getElementById('tooltipIcon').textContent = prop.icon;
+            document.getElementById('tooltipName').textContent = prop.name;
+            document.getElementById('tooltipDesc').textContent = prop.desc;
+            document.getElementById('tooltipOwned').textContent = `拥有: ${prop.owned}`;
+            
+            let x, y;
+            if (event.touches) {
+                x = event.touches[0].clientX;
+                y = event.touches[0].clientY;
+            } else {
+                x = event.clientX;
+                y = event.clientY;
+            }
+            
+            tooltip.style.left = (x + 10) + 'px';
+            tooltip.style.top = (y + 10) + 'px';
+            tooltip.classList.add('visible');
+            
+            tooltipTimeout = setTimeout(hideTooltip, 2000);
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.classList.remove('visible');
+            if (tooltipTimeout) {
+                clearTimeout(tooltipTimeout);
+                tooltipTimeout = null;
+            }
         }
 
         function renderSkillInfo(charId) {
@@ -823,7 +774,7 @@
             console.log('开始游戏:', {
                 level: currentLevel,
                 character: char,
-                props: propQuantities
+                props: equippedProps
             });
             
             location.href = 'game.html?level=' + currentLevel;
