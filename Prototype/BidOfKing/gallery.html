@@ -155,6 +155,16 @@
             filter: grayscale(0.5);
         }
 
+        .booth-card.available {
+            opacity: 0.9;
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .booth-card.available:hover {
+            transform: scale(1.03);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
         .booth-card.locked .booth-icon {
             font-size: 40px;
             opacity: 0.3;
@@ -302,6 +312,69 @@
             font-size: 14px;
             color: rgba(255, 255, 255, 0.5);
         }
+
+        .collect-info {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .collect-all-btn {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #4a2c00;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .collect-all-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .collect-all-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            transform: translateX(-50%);
+            box-shadow: none;
+        }
+
+        .purchase-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-top: 5px;
+        }
+
+        .booth-price {
+            font-size: 13px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .booth-req {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -318,7 +391,7 @@
                 </div>
                 <div class="coin-storage">
                     <span>💰</span>
-                    <span id="total-stored">0</span>
+                    <span id="player-coins">1,280,500</span>
                 </div>
             </div>
         </div>
@@ -329,21 +402,26 @@
         </div>
 
         <div class="tips">每个展位每小时可获得 8,000 金币</div>
+        <div class="collect-info">
+            <span>可领取:</span>
+            <span id="collectable-amount">💰 0</span>
+        </div>
         <button class="collect-all-btn" id="collect-all" onclick="collectAll()">一键领取</button>
     </div>
 
     <script>
         const playerLevel = 25;
+        const playerCoins = 1280500;
         const maxStorage = 200000;
         const earningsPerHour = 8000;
         
         const booths = [
-            { id: 1, name: '展位 A', icon: '🏪', unlockLevel: 1, unlocked: true },
-            { id: 2, name: '展位 B', icon: '🏪', unlockLevel: 10, unlocked: false },
-            { id: 3, name: '展位 C', icon: '🏪', unlockLevel: 20, unlocked: false },
-            { id: 4, name: '展位 D', icon: '🏪', unlockLevel: 30, unlocked: false },
-            { id: 5, name: '展位 E', icon: '🏪', unlockLevel: 40, unlocked: false },
-            { id: 6, name: '展位 F', icon: '🏪', unlockLevel: 50, unlocked: false }
+            { id: 1, name: '展位 A', icon: '🏪', unlockLevel: 1, price: 0, unlocked: true, purchased: true },
+            { id: 2, name: '展位 B', icon: '🏪', unlockLevel: 10, price: 50000, unlocked: false, purchased: false },
+            { id: 3, name: '展位 C', icon: '🏪', unlockLevel: 20, price: 150000, unlocked: false, purchased: false },
+            { id: 4, name: '展位 D', icon: '🏪', unlockLevel: 30, price: 300000, unlocked: false, purchased: false },
+            { id: 5, name: '展位 E', icon: '🏪', unlockLevel: 40, price: 500000, unlocked: false, purchased: false },
+            { id: 6, name: '展位 F', icon: '🏪', unlockLevel: 50, price: 800000, unlocked: false, purchased: false }
         ];
 
         const boothStorage = {
@@ -372,7 +450,7 @@
         function getTotalStored() {
             let total = 0;
             booths.forEach(booth => {
-                if (booth.unlocked) {
+                if (booth.unlocked && booth.purchased) {
                     total += calculateStored(booth.id);
                 }
             });
@@ -384,7 +462,36 @@
         }
 
         function canCollectAny() {
-            return booths.some(booth => booth.unlocked && canCollect(booth.id));
+            return booths.some(booth => booth.unlocked && booth.purchased && canCollect(booth.id));
+        }
+
+        function getTotalCollectable() {
+            let total = 0;
+            booths.forEach(booth => {
+                if (booth.unlocked && booth.purchased && canCollect(booth.id)) {
+                    total += Math.min(calculateStored(booth.id), earningsPerHour);
+                }
+            });
+            return total;
+        }
+
+        function purchaseBooth(boothId) {
+            const booth = booths.find(b => b.id === boothId);
+            if (!booth || booth.unlocked || booth.purchased) return;
+            
+            if (playerCoins < booth.price) {
+                alert('金币不足！需要 ' + booth.price.toLocaleString() + ' 金币');
+                return;
+            }
+            
+            if (!confirm('确定要购买 ' + booth.name + ' 吗？\n需要花费 ' + booth.price.toLocaleString() + ' 金币')) {
+                return;
+            }
+            
+            booth.purchased = true;
+            booth.unlocked = true;
+            alert('购买成功！' + booth.name + ' 已解锁');
+            updateDisplay();
         }
 
         function collectCoins(boothId) {
@@ -397,7 +504,7 @@
 
         function collectAll() {
             booths.forEach(booth => {
-                if (booth.unlocked) {
+                if (booth.unlocked && booth.purchased) {
                     while (canCollect(booth.id)) {
                         collectCoins(booth.id);
                     }
@@ -412,44 +519,57 @@
             booths.forEach(booth => {
                 const stored = calculateStored(booth.id);
                 const canCollectThis = canCollect(booth.id);
+                const isActive = booth.unlocked && booth.purchased;
+                const canBuy = booth.unlocked && !booth.purchased && playerCoins >= booth.price;
+                const isLocked = !booth.unlocked;
                 
-                html += `
-                    <div class="booth-card ${booth.unlocked ? 'unlocked' : 'locked'}">
-                        <span class="booth-icon">${booth.icon}</span>
-                        <span class="booth-name">${booth.name}</span>
-                        <span class="booth-earnings">+${earningsPerHour.toLocaleString()}/时</span>
-                        
-                        ${booth.unlocked ? `
-                            <div class="booth-status">
-                                <span class="stored-amount">💰 ${stored.toLocaleString()}</span>
-                                <button class="collect-btn" 
-                                    onclick="collectCoins(${booth.id})" 
-                                    ${!canCollectThis ? 'disabled' : ''}>
-                                    ${canCollectThis ? '领取' : '等待'}
-                                </button>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${(stored / maxStorage) * 100}%"></div>
-                            </div>
-                        ` : ''}
-                        
-                        ${!booth.unlocked ? `
-                            <div class="locked-overlay">
-                                <span class="locked-icon">🔒</span>
-                                <span class="locked-text">未解锁</span>
-                                <span class="locked-level">需要 Lv.${booth.unlockLevel}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+                let cardClass = 'booth-card';
+                if (isActive) cardClass += ' unlocked';
+                else if (isLocked) cardClass += ' locked';
+                else if (canBuy) cardClass += ' available';
+                
+                html += '<div class="' + cardClass + '">';
+                html += '<span class="booth-icon">' + (isLocked ? '🔒' : booth.icon) + '</span>';
+                html += '<span class="booth-name">' + booth.name + '</span>';
+                html += '<span class="booth-earnings">+' + earningsPerHour.toLocaleString() + '/时</span>';
+                
+                if (isActive) {
+                    html += '<div class="booth-status">';
+                    html += '<span class="stored-amount">收益 💰 ' + stored.toLocaleString() + '</span>';
+                    html += '<button class="collect-btn" onclick="collectCoins(' + booth.id + ')" ' + (!canCollectThis ? 'disabled' : '') + '>';
+                    html += (canCollectThis ? '领取' : '等待');
+                    html += '</button></div>';
+                    html += '<div class="progress-bar"><div class="progress-fill" style="width: ' + (stored / maxStorage * 100) + '%"></div></div>';
+                } else if (canBuy) {
+                    html += '<div class="purchase-section">';
+                    html += '<span class="booth-req">需要 Lv.' + booth.unlockLevel + '</span>';
+                    html += '<span class="booth-price">展位价格 💰 ' + booth.price.toLocaleString() + '</span>';
+                    html += '<button class="collect-btn" onclick="purchaseBooth(' + booth.id + ')">购买</button>';
+                    html += '</div>';
+                } else if (isLocked) {
+                    html += '<div class="purchase-section">';
+                    html += '<span class="booth-req">需要 Lv.' + booth.unlockLevel + '</span>';
+                    html += '<span class="booth-price">展位价格 💰 ' + booth.price.toLocaleString() + '</span>';
+                    html += '<button class="collect-btn disabled" disabled>等级不足</button>';
+                    html += '</div>';
+                } else {
+                    html += '<div class="purchase-section">';
+                    html += '<span class="booth-req">需要 Lv.' + booth.unlockLevel + '</span>';
+                    html += '<span class="booth-price">展位价格 💰 ' + booth.price.toLocaleString() + '</span>';
+                    html += '<button class="collect-btn disabled" disabled>金币不足</button>';
+                    html += '</div>';
+                }
+                
+                html += '</div>';
             });
 
             grid.innerHTML = html;
         }
 
         function updateDisplay() {
-            document.getElementById('player-level').textContent = `Lv.${playerLevel}`;
-            document.getElementById('total-stored').textContent = getTotalStored().toLocaleString();
+            document.getElementById('player-level').textContent = 'Lv.' + playerLevel;
+            document.getElementById('player-coins').textContent = playerCoins.toLocaleString();
+            document.getElementById('collectable-amount').textContent = '💰 ' + getTotalCollectable().toLocaleString();
             
             const collectAllBtn = document.getElementById('collect-all');
             collectAllBtn.disabled = !canCollectAny();
