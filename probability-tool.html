@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概率配置工具</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #f0f2f5;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+.container {
+  width: 100%;
+  max-width: 900px;
+}
+/* 头部 */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 24px 32px;
+  border-radius: 12px 12px 0 0;
+}
+.header h1 { font-size: 22px; font-weight: 600; }
+.header p { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+/* 主体卡片 */
+.card {
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.card-body { padding: 24px 32px 32px; }
+/* 全局配置行 */
+.global-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+}
+.form-group input {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 120px;
+  transition: border-color 0.2s;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+}
+/* 参数列表标题栏 */
+.params-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.params-header h3 { font-size: 15px; color: #333; }
+.btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary { background: #667eea; color: #fff; }
+.btn-primary:hover { background: #5a6fd6; }
+.btn-danger { background: #ff4d4f; color: #fff; }
+.btn-danger:hover { background: #e04345; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+/* 参数列表 */
+.params-list { display: flex; flex-direction: column; gap: 8px; }
+.param-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.param-row:hover { border-color: #d0d0d0; background: #f5f5ff; }
+.param-row .idx {
+  width: 28px;
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  flex-shrink: 0;
+}
+.param-row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.param-row input[type="text"]:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+}
+.param-row input[type="number"] {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: right;
+}
+.param-row input[type="number"]:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+}
+.param-row .pct-label {
+  font-size: 12px;
+  color: #999;
+  width: 16px;
+  flex-shrink: 0;
+}
+.param-row .del-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  line-height: 28px;
+  text-align: center;
+}
+.param-row .del-btn:hover { color: #ff4d4f; background: #fff1f0; }
+/* 底部信息 */
+.footer-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.summary {
+  font-size: 13px;
+  color: #666;
+}
+.summary .total-label { font-weight: 500; }
+.summary .total-value { font-weight: 600; }
+.summary .total-value.over { color: #ff4d4f; }
+.summary .total-value.ok { color: #52c41a; }
+.summary .remaining { margin-left: 8px; }
+/* 饼图区域 */
+.chart-wrapper {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+#pieChart {
+  width: 340px;
+  height: 340px;
+  flex-shrink: 0;
+}
+.chart-legend {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 12px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.legend-item .color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.legend-item .l-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.legend-item .l-pct { font-weight: 500; min-width: 48px; text-align: right; }
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #bbb;
+  font-size: 14px;
+}
+/* 响应式 */
+@media (max-width: 640px) {
+  .chart-wrapper { flex-direction: column; align-items: center; }
+  #pieChart { width: 280px; height: 280px; }
+  .card-body { padding: 16px; }
+  .param-row { flex-wrap: wrap; }
+  .param-row input[type="number"] { width: 70px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>概率配置工具</h1>
+    <p>配置参数名称、概率值，实时饼图预览</p>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <!-- 全局配置 -->
+      <div class="global-row">
+        <div class="form-group">
+          <label for="maxProb">概率最大值</label>
+          <input id="maxProb" type="number" value="100" min="1" step="1">
+        </div>
+        <div class="form-group">
+          <label for="paramCount">参数数量</label>
+          <input id="paramCount" type="number" value="4" min="1" max="50" step="1">
+        </div>
+      </div>
+
+      <!-- 参数列表标题 -->
+      <div class="params-header">
+        <h3>参数配置</h3>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" id="clearProbBtn" style="background:#f0f0f0;color:#666">清除概率</button>
+          <button class="btn btn-primary btn-sm" id="addParamBtn">+ 添加参数</button>
+        </div>
+      </div>
+
+      <!-- 参数列表 -->
+      <div id="paramsList" class="params-list"></div>
+
+      <!-- 底部汇总 -->
+      <div class="footer-bar">
+        <div class="summary" id="summary">
+          <span class="total-label">已分配：</span>
+          <span class="total-value" id="totalValue">0</span>
+          <span class="remaining">剩余：<span id="remainingValue">100</span></span>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="exportBtn">导出 JSON</button>
+        </div>
+      </div>
+
+      <!-- 饼图 -->
+      <div class="chart-wrapper">
+        <div id="pieChart"></div>
+        <div id="chartLegend" class="chart-legend"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 状态 ==========
+const state = {
+  maxProb: 100,
+  params: [
+    { name: "参数A", value: 25 },
+    { name: "参数B", value: 25 },
+    { name: "参数C", value: 25 },
+    { name: "参数D", value: 25 },
+  ],
+};
+
+// ========== DOM 引用 ==========
+const maxProbInput = document.getElementById("maxProb");
+const paramCountInput = document.getElementById("paramCount");
+const paramsListEl = document.getElementById("paramsList");
+const totalValueEl = document.getElementById("totalValue");
+const remainingValueEl = document.getElementById("remainingValue");
+const addParamBtn = document.getElementById("addParamBtn");
+const exportBtn = document.getElementById("exportBtn");
+
+// ========== ECharts ==========
+let pieChart = null;
+const COLORS = [
+  "#5470c6", "#91cc75", "#fac858", "#ee6666", "#73c0de",
+  "#3ba272", "#fc8452", "#9a60b4", "#ea7ccc", "#2ec7c9",
+  "#b6a2de", "#5ab1ef", "#ffb980", "#d87a80", "#8d98b3",
+  "#e5c07b", "#61afef", "#98c379", "#c678dd", "#56b6c2",
+];
+
+function initChart() {
+  pieChart = echarts.init(document.getElementById("pieChart"));
+  window.addEventListener("resize", () => pieChart && pieChart.resize());
+}
+
+function updateChart() {
+  if (!pieChart) return;
+  const total = state.params.reduce((s, p) => s + p.value, 0);
+  const remaining = state.maxProb - total;
+
+  const data = state.params
+    .filter(p => p.value > 0)
+    .map((p, i) => ({ value: p.value, name: p.name || `参数${i + 1}`, itemStyle: { color: COLORS[i % COLORS.length] } }));
+
+  if (remaining > 0) {
+    data.push({ value: remaining, name: "未分配", itemStyle: { color: "#e8e8e8" } });
+  }
+
+  const option = {
+    tooltip: { trigger: "item", formatter: "{b}: {c} ({d}%)" },
+    series: [{
+      type: "pie",
+      radius: ["36%", "68%"],
+      center: ["50%", "50%"],
+      avoidLabelOverlap: true,
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 14, fontWeight: "bold" },
+        itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.15)" },
+      },
+      data: data,
+    }],
+  };
+  pieChart.setOption(option, true);
+  updateLegend(data);
+}
+
+function updateLegend(data) {
+  const el = document.getElementById("chartLegend");
+  const total = data.reduce((s, d) => s + d.value, 0) || 1;
+  el.innerHTML = data.map((d, i) => {
+    const pct = ((d.value / total) * 100).toFixed(1);
+    return `<div class="legend-item">
+      <span class="color-dot" style="background:${d.itemStyle.color}"></span>
+      <span class="l-name">${d.name}</span>
+      <span class="l-pct">${d.value} (${pct}%)</span>
+    </div>`;
+  }).join("");
+}
+
+// ========== 渲染参数列表 ==========
+function renderParams() {
+  const total = state.params.reduce((s, p) => s + p.value, 0);
+  const remaining = state.maxProb - total;
+
+  // 空状态
+  if (state.params.length === 0) {
+    paramsListEl.innerHTML = '<div class="empty-state">暂无参数，点击上方 "+ 添加参数" 添加</div>';
+    updateSummary(total, remaining);
+    updateChart();
+    return;
+  }
+
+  let html = "";
+  state.params.forEach((p, i) => {
+    const pct = state.maxProb > 0 ? ((p.value / state.maxProb) * 100).toFixed(1) : "0.0";
+    html += `<div class="param-row" data-index="${i}">
+      <span class="idx">#${i + 1}</span>
+      <input type="text" class="param-name" value="${escapeHtml(p.name)}" placeholder="参数名称" data-index="${i}">
+      <input type="number" class="param-value" value="${p.value}" min="0" step="1" data-index="${i}">
+      <span class="pct-label">(${pct}%)</span>
+      <button class="del-btn" data-index="${i}" ${state.params.length <= 1 ? 'disabled style="opacity:0.2;cursor:not-allowed;"' : ""}>&times;</button>
+    </div>`;
+  });
+  paramsListEl.innerHTML = html;
+
+  // Update paramCount input
+  paramCountInput.value = state.params.length;
+
+  // 绑定事件
+  paramsListEl.querySelectorAll(".param-name").forEach(el => {
+    el.addEventListener("input", onParamNameChange);
+  });
+  paramsListEl.querySelectorAll(".param-value").forEach(el => {
+    el.addEventListener("change", onParamValueChange);
+  });
+  paramsListEl.querySelectorAll(".del-btn").forEach(el => {
+    el.addEventListener("click", onDeleteParam);
+  });
+
+  updateSummary(total, remaining);
+  updateChart();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ========== 事件处理 ==========
+function onParamNameChange(e) {
+  const idx = parseInt(e.target.dataset.index);
+  state.params[idx].name = e.target.value;
+}
+
+function onParamValueChange(e) {
+  const idx = parseInt(e.target.dataset.index);
+  let val = parseFloat(e.target.value) || 0;
+  val = Math.max(0, Math.round(val));
+  state.params[idx].value = val;
+  renderParams();
+}
+
+function onDeleteParam(e) {
+  const idx = parseInt(e.target.dataset.index);
+  if (state.params.length <= 1) return;
+  state.params.splice(idx, 1);
+  renderParams();
+}
+
+function onAddParam() {
+  const defaultVal = Math.max(0, Math.floor(state.maxProb / (state.params.length + 1)));
+  state.params.push({ name: `参数${state.params.length + 1}`, value: defaultVal });
+  renderParams();
+  // 滚动到底部
+  setTimeout(() => {
+    paramsListEl.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, 50);
+}
+
+function updateSummary(total, remaining) {
+  totalValueEl.textContent = total;
+  totalValueEl.className = "total-value" + (total > state.maxProb ? " over" : " ok");
+  remainingValueEl.textContent = Math.max(0, remaining);
+  remainingValueEl.style.color = remaining >= 0 ? "#52c41a" : "#ff4d4f";
+}
+
+// ========== 全局配置事件 ==========
+maxProbInput.addEventListener("input", function() {
+  state.maxProb = Math.max(1, parseInt(this.value) || 100);
+  renderParams();
+});
+
+paramCountInput.addEventListener("input", function() {
+  let count = Math.max(1, Math.min(50, parseInt(this.value) || 1));
+  while (state.params.length < count) {
+    const defaultVal = Math.max(0, Math.floor(state.maxProb / count));
+    state.params.push({ name: `参数${state.params.length + 1}`, value: defaultVal });
+  }
+  while (state.params.length > count) {
+    state.params.pop();
+  }
+  renderParams();
+});
+
+addParamBtn.addEventListener("click", onAddParam);
+
+// ========== 清除概率 ==========
+document.getElementById("clearProbBtn").addEventListener("click", function() {
+  state.params.forEach(p => { p.value = 0; });
+  renderParams();
+});
+
+// ========== 导出 JSON ==========
+exportBtn.addEventListener("click", function() {
+  const output = {
+    maxProbability: state.maxProb,
+    params: state.params.map((p, i) => ({
+      id: `param_${i + 1}`,
+      name: p.name || `参数${i + 1}`,
+      probability: p.value,
+    })),
+  };
+  const blob = new Blob([JSON.stringify(output, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "probability-config.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ========== 初始化 ==========
+initChart();
+renderParams();
+</script>
+</body>
+</html>
