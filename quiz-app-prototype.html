@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>做题 App 原型</title>
+  <style>
+    :root{
+      --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+      --text-title: 16px/24px var(--font-sans);
+      --text-body: 14px/20px var(--font-sans);
+      --text-caption: 12px/18px var(--font-sans);
+      --text-code: 13px/20px var(--font-mono);
+
+      --weight-medium: 600;
+      --weight-strong: 700;
+
+      --spacer-4: 4px;
+      --spacer-8: 8px;
+      --spacer-12: 12px;
+      --spacer-16: 16px;
+      --spacer-20: 20px;
+      --spacer-24: 24px;
+
+      --radius: 8px;
+      --radius-card: 12px;
+      --radius-full: 999px;
+
+      --bg: #f5f6fa;
+      --surface: #ffffff;
+      --surface-muted: #f6f6f8;
+      --border: rgba(0,0,0,.12);
+      --text: rgba(0,0,0,.88);
+      --text-muted: rgba(0,0,0,.6);
+      --shadow: 0 10px 30px rgba(0,0,0,.10);
+
+      --brand: #6E56CF;
+      --brand-weak: rgba(110,86,207,.12);
+      --accent: #2E7CF6;
+
+      --good: #0B7A47;
+      --bad: #B42318;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin: 0;
+      font: var(--text-body);
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .page{
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .hero{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+      padding: var(--spacer-16);
+      margin-bottom: var(--spacer-16);
+    }
+
+    .hero h1{
+      margin: 0 0 8px 0;
+      font: var(--weight-medium) 20px/28px var(--font-sans);
+    }
+
+    .hero p{
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .proto-wrap{
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .proto-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: var(--spacer-12);
+      padding: var(--spacer-12) var(--spacer-16);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title{
+      font: var(--weight-medium) var(--text-title);
+    }
+
+    .badges{
+      display:flex;
+      gap: var(--spacer-8);
+      flex-wrap: wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+      font: var(--text-caption);
+      color: var(--text-muted);
+    }
+
+    .pill b{
+      color: var(--text);
+      font-weight: var(--weight-medium);
+    }
+
+    .proto-main{
+      display:grid;
+      grid-template-columns: 1fr 340px;
+      gap: var(--spacer-16);
+      padding: var(--spacer-16);
+      background: var(--surface-muted);
+    }
+
+    @media (max-width: 860px){
+      .proto-main{ grid-template-columns: 1fr; }
+    }
+
+    .phone{
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+
+    .statusbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: var(--spacer-8) var(--spacer-16);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font: var(--text-caption);
+      color: var(--text-muted);
+    }
+
+    .navbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: var(--spacer-12);
+      padding: var(--spacer-12) var(--spacer-16);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .nav-left, .nav-right{
+      display:flex;
+      align-items:center;
+      gap: var(--spacer-8);
+    }
+
+    .iconbtn{
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 6px 10px;
+      font: var(--text-caption);
+      cursor: pointer;
+    }
+
+    .iconbtn:hover{ border-color: rgba(110,86,207,.45); }
+
+    .nav-title{
+      font: var(--weight-medium) var(--text-title);
+      letter-spacing: .2px;
+    }
+
+    .screen{
+      padding: var(--spacer-16);
+      min-height: 560px;
+      background: var(--surface);
+    }
+
+    .section{
+      padding: var(--spacer-12);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+    }
+
+    .h2{
+      font: var(--weight-medium) var(--text-title);
+      margin: 0 0 var(--spacer-8) 0;
+    }
+
+    .p{
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .row{
+      display:flex;
+      gap: var(--spacer-12);
+      align-items:center;
+    }
+
+    .row.wrap{ flex-wrap: wrap; }
+
+    .btn{
+      border: 1px solid rgba(110,86,207,.55);
+      background: var(--brand);
+      color: white;
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font: var(--weight-medium) var(--text-body);
+      cursor:pointer;
+    }
+
+    .btn.secondary{
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn.ghost{
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .field{
+      width: 100%;
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .label{
+      font: var(--text-caption);
+      color: var(--text-muted);
+    }
+
+    .input{
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font: var(--text-body);
+      color: var(--text);
+      width: 100%;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: var(--spacer-8);
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--spacer-12);
+      background: var(--surface);
+    }
+
+    .card .meta{
+      font: var(--text-caption);
+      color: var(--text-muted);
+    }
+
+    .card .title{
+      font: var(--weight-medium) var(--text-body);
+      margin-top: 4px;
+    }
+
+    .card .actions{
+      margin-top: var(--spacer-8);
+      display:flex;
+      gap: var(--spacer-8);
+      flex-wrap:wrap;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+      font: var(--text-caption);
+      color: var(--text-muted);
+    }
+
+    .tag.brand{
+      border-color: rgba(110,86,207,.45);
+      background: var(--brand-weak);
+      color: var(--text);
+    }
+
+    .tag.good{
+      border-color: rgba(11,122,71,.35);
+      background: rgba(11,122,71,.12);
+      color: var(--text);
+    }
+
+    .tag.bad{
+      border-color: rgba(180,35,24,.35);
+      background: rgba(180,35,24,.12);
+      color: var(--text);
+    }
+
+    .divider{
+      height:1px;
+      background: var(--border);
+      margin: var(--spacer-12) 0;
+    }
+
+    .helper{
+      font: var(--text-caption);
+      color: var(--text-muted);
+    }
+
+    .sidebar{
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      padding: var(--spacer-12);
+    }
+
+    .sidebar h3{
+      font: var(--weight-medium) var(--text-title);
+      margin: 0 0 var(--spacer-8) 0;
+    }
+
+    .step{
+      display:flex;
+      gap: var(--spacer-8);
+      align-items:flex-start;
+      padding: var(--spacer-8);
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .step:hover{
+      background: var(--surface-muted);
+      border-color: var(--border);
+    }
+
+    .step.active{
+      border-color: rgba(110,86,207,.45);
+      background: var(--brand-weak);
+    }
+
+    .step .k{
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-full);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      font: var(--text-caption);
+      color: var(--text-muted);
+      flex: 0 0 auto;
+    }
+
+    .step.active .k{
+      background: rgba(110,86,207,.18);
+      color: var(--text);
+      border-color: rgba(110,86,207,.4);
+    }
+
+    .step .t{ flex:1; }
+
+    .step .t .name{
+      font: var(--weight-medium) var(--text-body);
+    }
+
+    .step .t .desc{
+      font: var(--text-caption);
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .toast{
+      display:none;
+      margin-top: var(--spacer-12);
+      padding: var(--spacer-12);
+      border: 1px solid rgba(110,86,207,.45);
+      background: var(--brand-weak);
+      border-radius: var(--radius-card);
+      font: var(--text-caption);
+      color: var(--text);
+    }
+
+    .toast.show{ display:block; }
+
+    .modal-backdrop{
+      display:none;
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.35);
+      padding: var(--spacer-16);
+    }
+
+    .modal-backdrop.show{
+      display:flex;
+      align-items:flex-end;
+    }
+
+    .modal{
+      width:100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--spacer-12);
+    }
+
+    .modal .modal-title{
+      font: var(--weight-medium) var(--text-title);
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacer-12);
+    }
+
+    @media (max-width: 520px){
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    .kpi{
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      padding: var(--spacer-12);
+    }
+
+    .kpi .v{
+      font: var(--weight-strong) var(--text-title);
+    }
+
+    .kpi .l{
+      font: var(--text-caption);
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .choice{
+      display:flex;
+      align-items:center;
+      gap: var(--spacer-8);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      cursor:pointer;
+    }
+
+    .choice:hover{
+      border-color: rgba(110,86,207,.45);
+    }
+
+    .choice input{
+      accent-color: var(--brand);
+    }
+
+    .question{
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: var(--spacer-12);
+      background: var(--surface);
+    }
+
+    .question .qtitle{
+      font: var(--weight-medium) var(--text-body);
+    }
+
+    .question .qmeta{
+      margin-top: 4px;
+      font: var(--text-caption);
+      color: var(--text-muted);
+      display:flex;
+      gap: var(--spacer-8);
+      flex-wrap:wrap;
+    }
+
+    .progress{
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      overflow:hidden;
+    }
+
+    .progress > div{
+      height:100%;
+      width: 0%;
+      background: var(--brand);
+      transition: width 160ms ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h1>做题 App 交互原型</h1>
+      <p>这是一个可本地直接打开的单文件 HTML 原型，包含学生端与教师端流程，当前仅用于演示页面结构、交互跳转与业务口径。</p>
+    </div>
+
+    <div class="proto-wrap" id="proto">
+      <div class="proto-top">
+        <div class="title">做题 App（UniApp）交互原型</div>
+        <div class="badges">
+          <span class="pill">当前角色：<b id="badgeRole">未选择</b></span>
+          <span class="pill">当前班级：<b id="badgeClass">—</b></span>
+          <span class="pill">当前任务：<b id="badgeTask">—</b></span>
+        </div>
+      </div>
+
+      <div class="proto-main">
+        <div class="phone" id="phone">
+          <div class="statusbar"><span>09:41</span><span>4G · 100%</span></div>
+          <div class="navbar">
+            <div class="nav-left">
+              <button class="iconbtn" id="btnBack">返回</button>
+              <span class="tag brand" id="navChip">入口</span>
+            </div>
+            <div class="nav-title" id="navTitle">选择入口</div>
+            <div class="nav-right">
+              <button class="iconbtn" id="btnReset">重置</button>
+            </div>
+          </div>
+
+          <div class="screen" id="screen"></div>
+
+          <div class="modal-backdrop" id="modal">
+            <div class="modal">
+              <div class="modal-title" id="modalTitle">弹窗</div>
+              <div class="divider"></div>
+              <div id="modalBody"></div>
+              <div class="divider"></div>
+              <div class="row" style="justify-content:flex-end">
+                <button class="btn secondary" id="modalCancel">取消</button>
+                <button class="btn" id="modalOk">确定</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar">
+          <h3>快速跳转</h3>
+          <div class="helper">用于检查流程是否完整，不代表最终导航结构。</div>
+          <div class="divider"></div>
+          <div class="list" id="steps"></div>
+          <div class="toast" id="toast"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const root = document.querySelector('#proto');
+      const $ = (sel) => root.querySelector(sel);
+      const screen = $('#screen');
+      const navTitle = $('#navTitle');
+      const navChip = $('#navChip');
+      const badgeRole = $('#badgeRole');
+      const badgeClass = $('#badgeClass');
+      const badgeTask = $('#badgeTask');
+      const btnBack = $('#btnBack');
+      const btnReset = $('#btnReset');
+
+      const modal = $('#modal');
+      const modalTitle = $('#modalTitle');
+      const modalBody = $('#modalBody');
+      const modalCancel = $('#modalCancel');
+      const modalOk = $('#modalOk');
+
+      const stepsEl = $('#steps');
+      const toast = $('#toast');
+
+      const state = {
+        stack: [],
+        role: null,
+        className: null,
+        classCode: null,
+        taskId: null,
+        taskName: null,
+        quiz: {
+          idx: 0,
+          total: 5,
+          answers: {},
+          wrongIds: ['Q2', 'Q5']
+        },
+        teacher: {
+          currentBank: '数学-题库A',
+          currentClass: '七年级(2)班',
+          aiReviewOn: true
+        }
+      };
+
+      const routes = {
+        entry: { chip: '入口', title: '选择入口' },
+        s_join: { chip: '学生端', title: '加入班级' },
+        s_tasks: { chip: '学生端', title: '学习任务' },
+        s_task_detail: { chip: '学生端', title: '任务详情' },
+        s_doing: { chip: '学生端', title: '开始做题' },
+        s_review: { chip: '学生端', title: '批阅结果' },
+        s_wrong: { chip: '学生端', title: '错题集' },
+        t_login: { chip: '教师端', title: '教师登录' },
+        t_home: { chip: '教师端', title: '管理主页' },
+        t_class: { chip: '教师端', title: '班级管理' },
+        t_bank: { chip: '教师端', title: '题库管理' },
+        t_task_mgmt: { chip: '教师端', title: '学习任务管理' },
+        t_wrong_stats: { chip: '教师端', title: '错题统计' }
+      };
+
+      const jumpList = [
+        { id:'entry', name:'入口选择', desc:'学生端 / 教师端' },
+        { id:'s_join', name:'学生加入班级', desc:'选择班级或输入班级码' },
+        { id:'s_tasks', name:'学生任务列表', desc:'查看学习任务' },
+        { id:'s_task_detail', name:'任务详情/开始', desc:'抽题规则说明' },
+        { id:'s_doing', name:'做题页面', desc:'选择/填空/输入答案' },
+        { id:'s_review', name:'批阅结果', desc:'答案+AI联合批阅' },
+        { id:'s_wrong', name:'错题集', desc:'错题回顾与再练' },
+        { id:'t_login', name:'教师登录', desc:'账号登录入口' },
+        { id:'t_home', name:'教师主页', desc:'班级/题库/任务/统计' },
+        { id:'t_class', name:'班级管理', desc:'邀请、审核学生，多老师' },
+        { id:'t_bank', name:'题库管理', desc:'开关、重传、AI审核开关' },
+        { id:'t_task_mgmt', name:'学习任务管理', desc:'查看学习次数与错题统计' },
+        { id:'t_wrong_stats', name:'错题统计', desc:'所有学生做错题目统计' }
+      ];
+
+      function setToast(msg){
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(setToast._t);
+        setToast._t = setTimeout(() => toast.classList.remove('show'), 2400);
+      }
+
+      function setHeader(routeId){
+        const r = routes[routeId] || routes.entry;
+        navTitle.textContent = r.title;
+        navChip.textContent = r.chip;
+
+        badgeRole.textContent = state.role ? (state.role === 'student' ? '学生' : '教师') : '未选择';
+        badgeClass.textContent = state.className ? state.className : '—';
+        badgeTask.textContent = state.taskName ? state.taskName : '—';
+
+        btnBack.disabled = state.stack.length <= 1;
+      }
+
+      function push(routeId){
+        state.stack.push(routeId);
+        render(routeId);
+      }
+
+      function replace(routeId){
+        if (state.stack.length === 0) state.stack.push(routeId);
+        else state.stack[state.stack.length - 1] = routeId;
+        render(routeId);
+      }
+
+      function back(){
+        if (state.stack.length <= 1) return;
+        state.stack.pop();
+        render(state.stack[state.stack.length - 1]);
+      }
+
+      function openModal({title, bodyHtml, okText='确定', cancelText='取消', onOk}){
+        modalTitle.textContent = title;
+        modalBody.innerHTML = bodyHtml;
+        modalOk.textContent = okText;
+        modalCancel.textContent = cancelText;
+        modal.classList.add('show');
+
+        const cleanup = () => {
+          modal.classList.remove('show');
+          modalOk.onclick = null;
+          modalCancel.onclick = null;
+        };
+
+        modalCancel.onclick = cleanup;
+        modalOk.onclick = () => {
+          try { onOk && onOk(); } finally { cleanup(); }
+        };
+      }
+
+      function renderEntry(){
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">选择入口</div>
+            <p class="p">仅演示流程与页面结构，不接真实数据。</p>
+            <div class="divider"></div>
+            <div class="row wrap">
+              <button class="btn" data-go="student">进入学生端</button>
+              <button class="btn secondary" data-go="teacher">进入教师端</button>
+            </div>
+            <div class="divider"></div>
+            <div class="helper">学生端：加入班级 → 任务列表 → 做题 → 批阅 → 错题集</div>
+            <div class="helper">教师端：登录 → 班级管理 / 题库管理 / 学习任务 / 错题统计</div>
+          </div>
+        `;
+      }
+
+      function renderStudentJoin(){
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">加入班级</div>
+            <p class="p">两种方式：选择已有班级，或输入班级码。</p>
+            <div class="divider"></div>
+
+            <div class="grid2">
+              <div class="field">
+                <div class="label">班级码</div>
+                <input class="input" id="classCode" placeholder="例如：A1B2C3" value="${state.classCode || ''}" />
+                <div class="row wrap">
+                  <button class="btn" id="btnJoin">输入班级码进入</button>
+                  <button class="btn secondary" id="btnPaste">一键填入示例码</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="label">选择班级（示例）</div>
+                <div class="list">
+                  <div class="card">
+                    <div class="meta">班级</div>
+                    <div class="title">七年级(2)班</div>
+                    <div class="actions">
+                      <button class="btn" data-pick-class="七年级(2)班">进入</button>
+                      <button class="btn ghost" data-class-info="七年级(2)班">查看信息</button>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="meta">班级</div>
+                    <div class="title">八年级(1)班</div>
+                    <div class="actions">
+                      <button class="btn" data-pick-class="八年级(1)班">进入</button>
+                      <button class="btn ghost" data-class-info="八年级(1)班">查看信息</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="helper">真实业务中：教师邀请/审核通过后才可进入；这里用弹窗模拟。</div>
+          </div>
+        `;
+
+        const codeInput = $('#classCode');
+        $('#btnPaste').addEventListener('click', () => { codeInput.value = 'A1B2C3'; });
+        $('#btnJoin').addEventListener('click', () => {
+          const code = (codeInput.value || '').trim();
+          if (!code){ setToast('请先输入班级码'); return; }
+          state.classCode = code;
+          openModal({
+            title: '加入班级申请',
+            bodyHtml: `
+              <div class="helper">你输入的班级码：<span style="font:var(--text-code)">${code}</span></div>
+              <div class="divider"></div>
+              <div class="choice"><input type="radio" name="join" checked /> <div><div style="font-weight:600">教师审核通过</div><div class="helper">进入班级并看到任务</div></div></div>
+              <div style="height:8px"></div>
+              <div class="choice"><input type="radio" name="join" /> <div><div style="font-weight:600">暂未通过</div><div class="helper">保持在等待状态</div></div></div>
+            `,
+            okText: '模拟通过',
+            cancelText: '先不通过',
+            onOk: () => {
+              state.className = '七年级(2)班';
+              setToast('已通过审核，进入班级');
+              push('s_tasks');
+            }
+          });
+        });
+
+        screen.querySelectorAll('[data-pick-class]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.className = btn.getAttribute('data-pick-class');
+            state.classCode = null;
+            setToast('进入班级：' + state.className);
+            push('s_tasks');
+          });
+        });
+
+        screen.querySelectorAll('[data-class-info]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const name = btn.getAttribute('data-class-info');
+            openModal({
+              title: '班级信息',
+              bodyHtml: `
+                <div class="helper">班级：<b>${name}</b></div>
+                <div class="helper">老师：创建者(最高权限) + 其他老师（示例）</div>
+                <div class="helper">学生：待审核/已加入（示例）</div>
+              `,
+              okText: '知道了',
+              cancelText: '关闭'
+            });
+          });
+        });
+      }
+
+      function renderStudentTasks(){
+        const cls = state.className || '（未选班级）';
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">学习任务</div>
+            <p class="p">班级：${cls}</p>
+            <div class="divider"></div>
+            <div class="list">
+              ${[
+                {id:'T1', name:'英语·词汇训练(初级)', bank:'英语题库-01', num:10, diff:'1~2', open:true},
+                {id:'T2', name:'数学·方程练习(中级)', bank:'数学题库A', num:8, diff:'3~4', open:true},
+                {id:'T3', name:'英语·阅读理解(高级)', bank:'英语题库-02', num:6, diff:'4~5', open:false},
+              ].map(t => `
+                <div class="card">
+                  <div class="row wrap" style="justify-content:space-between">
+                    <div>
+                      <div class="meta">任务ID：${t.id} · 题库：${t.bank}</div>
+                      <div class="title">${t.name}</div>
+                    </div>
+                    <div class="row wrap" style="justify-content:flex-end">
+                      <span class="tag ${t.open?'good':'bad'}">${t.open?'进行中':'已关闭'}</span>
+                      <span class="tag">题量 ${t.num}</span>
+                      <span class="tag">难度 ${t.diff}</span>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn" data-open-task="${t.id}">查看并开始</button>
+                    <button class="btn secondary" data-open-wrong="${t.id}">查看错题集</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="divider"></div>
+            <div class="helper">抽题规则（展示用）：优先未出现题；错题概率×2；做对概率×0.5；连续做对5次恢复。</div>
+          </div>
+        `;
+
+        screen.querySelectorAll('[data-open-task]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-open-task');
+            state.taskId = id;
+            state.taskName = id === 'T1' ? '英语·词汇训练(初级)' : (id === 'T2' ? '数学·方程练习(中级)' : '英语·阅读理解(高级)');
+            push('s_task_detail');
+          });
+        });
+
+        screen.querySelectorAll('[data-open-wrong]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-open-wrong');
+            state.taskId = id;
+            state.taskName = id === 'T1' ? '英语·词汇训练(初级)' : (id === 'T2' ? '数学·方程练习(中级)' : '英语·阅读理解(高级)');
+            push('s_wrong');
+          });
+        });
+      }
+
+      function renderStudentTaskDetail(){
+        const name = state.taskName || '（未选任务）';
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">任务详情</div>
+            <p class="p">${name}</p>
+            <div class="divider"></div>
+
+            <div class="kpi">
+              <div class="v">本次将抽取 5 题（示例）</div>
+              <div class="l">题库抽题 + 概率调度（错题×2 / 正确×0.5 / 连对5次恢复）</div>
+            </div>
+
+            <div style="height:12px"></div>
+            <div class="section" style="background:var(--surface-muted)">
+              <div class="h2">抽题优先级（说明）</div>
+              <div class="helper">1. 未出现过的题：优先出现</div>
+              <div class="helper">2. 错题：出现概率基数×2，直到连续做对5次</div>
+              <div class="helper">3. 做对题：出现概率基数×0.5</div>
+              <div class="helper">4. 错题集复习：做对也算连续做对次数+1</div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="row wrap">
+              <button class="btn" id="btnStart">开始学习任务</button>
+              <button class="btn secondary" id="btnWrong">先看错题集</button>
+            </div>
+          </div>
+        `;
+
+        $('#btnStart').addEventListener('click', () => {
+          state.quiz.idx = 0;
+          state.quiz.total = 5;
+          state.quiz.answers = {};
+          push('s_doing');
+        });
+        $('#btnWrong').addEventListener('click', () => push('s_wrong'));
+      }
+
+      function questionFixture(i){
+        const items = [
+          { id:'Q1', type:'选择题', subject:'英语', diff:1, stem:'选择正确的单词拼写', options:['appple','apple','aple','appel'], hint:'', answer:'apple' },
+          { id:'Q2', type:'填空', subject:'数学', diff:3, stem:'解方程：x + 3 = 7，x = ?', options:null, hint:'请输入数字', answer:'4' },
+          { id:'Q3', type:'输入答案', subject:'英语', diff:2, stem:'翻译：good morning（中文）', options:null, hint:'请输入中文', answer:'早上好' },
+          { id:'Q4', type:'选择题', subject:'数学', diff:4, stem:'下列哪个是质数？', options:['9','15','17','21'], hint:'', answer:'17' },
+          { id:'Q5', type:'输入答案', subject:'英语', diff:3, stem:'写出一个“happy”的同义词', options:null, hint:'例如：glad', answer:'glad' },
+        ];
+        return items[i] || items[0];
+      }
+
+      function renderStudentDoing(){
+        const idx = state.quiz.idx;
+        const total = state.quiz.total;
+        const q = questionFixture(idx);
+        const progress = Math.round((idx / total) * 100);
+
+        let body = '';
+        if (q.type === '选择题'){
+          const selected = state.quiz.answers[q.id] || '';
+          body = `
+            <div class="list">
+              ${q.options.map(opt => `
+                <label class="choice">
+                  <input type="radio" name="opt" value="${opt}" ${selected===opt?'checked':''} />
+                  <div>${opt}</div>
+                </label>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          const val = state.quiz.answers[q.id] || '';
+          body = `
+            <div class="field">
+              <div class="label">${q.hint || '请输入答案'}</div>
+              <input class="input" id="ans" value="${String(val).replace(/"/g,'&quot;')}" placeholder="${q.hint || ''}" />
+            </div>
+          `;
+        }
+
+        screen.innerHTML = `
+          <div class="section">
+            <div class="row" style="justify-content:space-between; align-items:flex-end">
+              <div>
+                <div class="h2">做题中</div>
+                <div class="helper">第 ${idx + 1} / ${total} 题</div>
+              </div>
+              <div class="tag brand">${q.type}</div>
+            </div>
+            <div style="height:12px"></div>
+            <div class="progress"><div style="width:${progress}%"></div></div>
+            <div style="height:12px"></div>
+
+            <div class="question">
+              <div class="qtitle">${q.stem}</div>
+              <div class="qmeta">
+                <span class="tag">科目 ${q.subject}</span>
+                <span class="tag">难度 ${q.diff}</span>
+                <span class="tag ${state.quiz.wrongIds.includes(q.id)?'bad':'good'}">${state.quiz.wrongIds.includes(q.id)?'高概率错题':'普通'}</span>
+              </div>
+              <div class="divider"></div>
+              ${body}
+            </div>
+
+            <div class="divider"></div>
+            <div class="row wrap" style="justify-content:space-between">
+              <button class="btn secondary" id="btnPrev" ${idx===0?'disabled':''}>上一题</button>
+              <div class="row wrap" style="justify-content:flex-end">
+                <button class="btn ghost" id="btnSave">保存本题</button>
+                <button class="btn" id="btnNext">${idx===total-1?'提交并批阅':'下一题'}</button>
+              </div>
+            </div>
+            <div class="helper" style="margin-top:8px">提交后：系统答案 + AI 共同批阅（展示用）。</div>
+          </div>
+        `;
+
+        function save(){
+          if (q.type === '选择题'){
+            const checked = screen.querySelector('input[name="opt"]:checked');
+            state.quiz.answers[q.id] = checked ? checked.value : '';
+          } else {
+            state.quiz.answers[q.id] = ($('#ans')?.value || '').trim();
+          }
+          setToast('已保存：' + q.id);
+        }
+
+        $('#btnSave').addEventListener('click', save);
+        $('#btnPrev').addEventListener('click', () => { save(); state.quiz.idx = Math.max(0, state.quiz.idx - 1); replace('s_doing'); });
+        $('#btnNext').addEventListener('click', () => {
+          save();
+          if (idx < total - 1){
+            state.quiz.idx += 1;
+            replace('s_doing');
+          } else {
+            push('s_review');
+          }
+        });
+      }
+
+      function renderStudentReview(){
+        const total = state.quiz.total;
+        const wrong = state.quiz.wrongIds.length;
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">批阅结果</div>
+            <p class="p">本次任务已结束，展示“系统答案 + AI”联合批阅结果。</p>
+            <div class="divider"></div>
+
+            <div class="grid2">
+              <div class="kpi"><div class="v">${total - wrong} / ${total}</div><div class="l">本次正确题数</div></div>
+              <div class="kpi"><div class="v">${wrong}</div><div class="l">本次错题数（已标记）</div></div>
+            </div>
+
+            <div style="height:12px"></div>
+            <div class="section" style="background:var(--surface-muted)">
+              <div class="h2">批阅示例（2条）</div>
+              <div class="card">
+                <div class="meta">Q2 · 填空 · 数学</div>
+                <div class="title">AI点评：步骤正确但最终答案填写错误</div>
+                <div class="actions">
+                  <span class="tag bad">判定：错</span>
+                  <span class="tag">正确答案：4</span>
+                  <span class="tag">你的答案：${state.quiz.answers['Q2'] || '（空）'}</span>
+                </div>
+              </div>
+              <div style="height:8px"></div>
+              <div class="card">
+                <div class="meta">Q1 · 选择 · 英语</div>
+                <div class="title">AI点评：拼写正确</div>
+                <div class="actions">
+                  <span class="tag good">判定：对</span>
+                  <span class="tag">正确答案：apple</span>
+                  <span class="tag">你的答案：${state.quiz.answers['Q1'] || '（空）'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="row wrap">
+              <button class="btn" id="btnWrong">去错题集</button>
+              <button class="btn secondary" id="btnAgain">再次开始学习任务</button>
+            </div>
+            <div class="helper" style="margin-top:8px">再次开始时：错题出现概率×2；连续做对5次后恢复。</div>
+          </div>
+        `;
+
+        $('#btnWrong').addEventListener('click', () => push('s_wrong'));
+        $('#btnAgain').addEventListener('click', () => push('s_task_detail'));
+      }
+
+      function renderStudentWrong(){
+        const name = state.taskName || '（未选任务）';
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">错题集</div>
+            <p class="p">任务：${name}</p>
+            <div class="divider"></div>
+
+            <div class="list">
+              ${[
+                {id:'Q2', stem:'x + 3 = 7，x = ?', times:2, streak:1},
+                {id:'Q5', stem:'写出 happy 的同义词', times:1, streak:0},
+              ].map(x => `
+                <div class="card">
+                  <div class="meta">题目ID：${x.id}</div>
+                  <div class="title">${x.stem}</div>
+                  <div class="actions">
+                    <span class="tag bad">历史错次数 ${x.times}</span>
+                    <span class="tag">连续做对 ${x.streak} / 5</span>
+                    <button class="btn" data-retry="${x.id}">再练一次</button>
+                    <button class="btn secondary" data-show="${x.id}">查看解析</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="divider"></div>
+            <div class="row wrap">
+              <button class="btn secondary" id="btnBackTasks">返回任务列表</button>
+              <button class="btn" id="btnGoTask">开始任务（概率会偏向错题）</button>
+            </div>
+            <div class="helper" style="margin-top:8px">在错题集做对：也算作“连续做对次数 +1”（演示用）。</div>
+          </div>
+        `;
+
+        screen.querySelectorAll('[data-show]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-show');
+            openModal({
+              title: '题目解析（示例）',
+              bodyHtml: `
+                <div class="helper">题目ID：<span style="font:var(--text-code)">${id}</span></div>
+                <div class="divider"></div>
+                <div class="helper">解释：这里展示“解释字段”的内容。</div>
+                <div class="helper">其他正确答案：如同义词可列出多个。</div>
+              `,
+              okText: '关闭',
+              cancelText: '关闭'
+            });
+          });
+        });
+
+        screen.querySelectorAll('[data-retry]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-retry');
+            openModal({
+              title: '再练一次（模拟）',
+              bodyHtml: `
+                <div class="helper">题目：<span style="font:var(--text-code)">${id}</span></div>
+                <div class="divider"></div>
+                <div class="choice"><input type="radio" name="retry" checked /> <div><div style="font-weight:600">这次做对了</div><div class="helper">连续做对次数 +1</div></div></div>
+                <div style="height:8px"></div>
+                <div class="choice"><input type="radio" name="retry" /> <div><div style="font-weight:600">这次仍然做错</div><div class="helper">保持高概率（×2）</div></div></div>
+              `,
+              okText: '保存结果',
+              cancelText: '取消',
+              onOk: () => setToast('已记录：错题集练习结果（示例）')
+            });
+          });
+        });
+
+        $('#btnBackTasks').addEventListener('click', () => push('s_tasks'));
+        $('#btnGoTask').addEventListener('click', () => push('s_task_detail'));
+      }
+
+      function renderTeacherLogin(){
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">教师登录</div>
+            <p class="p">演示账号登录后进入管理主页。</p>
+            <div class="divider"></div>
+
+            <div class="field">
+              <div class="label">账号</div>
+              <input class="input" value="teacher_demo" />
+            </div>
+            <div style="height:8px"></div>
+            <div class="field">
+              <div class="label">密码</div>
+              <input class="input" type="password" value="123456" />
+            </div>
+
+            <div class="divider"></div>
+            <div class="row wrap">
+              <button class="btn" id="btnLogin">登录进入教师端</button>
+              <button class="btn secondary" id="btnCreateClass">首次：创建班级（模拟）</button>
+            </div>
+            <div class="helper" style="margin-top:8px">班级可多老师，创建者最高权限（演示用）。</div>
+          </div>
+        `;
+
+        $('#btnLogin').addEventListener('click', () => { state.role='teacher'; push('t_home'); });
+        $('#btnCreateClass').addEventListener('click', () => {
+          openModal({
+            title: '创建班级（模拟）',
+            bodyHtml: `
+              <div class="field">
+                <div class="label">班级名称</div>
+                <input class="input" value="七年级(2)班" />
+              </div>
+              <div style="height:8px"></div>
+              <div class="field">
+                <div class="label">生成班级码（示例）</div>
+                <input class="input" value="A1B2C3" disabled />
+              </div>
+            `,
+            okText: '创建并进入',
+            cancelText: '取消',
+            onOk: () => {
+              state.teacher.currentClass = '七年级(2)班';
+              state.role = 'teacher';
+              setToast('班级已创建：七年级(2)班');
+              push('t_home');
+            }
+          });
+        });
+      }
+
+      function renderTeacherHome(){
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">教师端 · 管理主页</div>
+            <p class="p">班级：${state.teacher.currentClass} · 题库：${state.teacher.currentBank}</p>
+            <div class="divider"></div>
+
+            <div class="grid2">
+              <div class="kpi"><div class="v">2</div><div class="l">班级老师数（示例）</div></div>
+              <div class="kpi"><div class="v">38</div><div class="l">学生数（示例）</div></div>
+            </div>
+
+            <div style="height:12px"></div>
+            <div class="list">
+              <div class="card">
+                <div class="meta">班级</div>
+                <div class="title">管理班级：邀请/审核学生，多老师权限</div>
+                <div class="actions"><button class="btn" data-go="t_class">进入班级管理</button></div>
+              </div>
+              <div class="card">
+                <div class="meta">题库</div>
+                <div class="title">上传题库、开关、重传、AI自动审核开关</div>
+                <div class="actions"><button class="btn" data-go="t_bank">进入题库管理</button></div>
+              </div>
+              <div class="card">
+                <div class="meta">学习任务</div>
+                <div class="title">创建/开关任务，查看学习次数和所有学生做错题目的错题统计</div>
+                <div class="actions"><button class="btn" data-go="t_task_mgmt">进入任务管理</button></div>
+              </div>
+              <div class="card">
+                <div class="meta">统计</div>
+                <div class="title">错题统计：所有学生做错题目的累计统计</div>
+                <div class="actions"><button class="btn" data-go="t_wrong_stats">进入错题统计</button></div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        screen.querySelectorAll('[data-go]').forEach(btn => btn.addEventListener('click', () => push(btn.getAttribute('data-go'))));
+      }
+
+      function renderTeacherClass(){
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">班级管理</div>
+            <p class="p">班级：${state.teacher.currentClass}（创建者最高权限）</p>
+            <div class="divider"></div>
+
+            <div class="card">
+              <div class="meta">邀请学生</div>
+              <div class="title">分享班级码 / 生成邀请链接（示例）</div>
+              <div class="actions">
+                <span class="tag brand">班级码 A1B2C3</span>
+                <button class="btn secondary" id="btnInvite">生成邀请（模拟）</button>
+              </div>
+            </div>
+
+            <div style="height:8px"></div>
+            <div class="card">
+              <div class="meta">待审核学生（示例）</div>
+              <div class="title">student_001 · 申请加入</div>
+              <div class="actions">
+                <button class="btn" id="btnApprove">通过</button>
+                <button class="btn secondary" id="btnReject">拒绝</button>
+              </div>
+            </div>
+
+            <div style="height:8px"></div>
+            <div class="card">
+              <div class="meta">班级老师（示例）</div>
+              <div class="title">创建者 teacher_demo + 老师 teacher_02</div>
+              <div class="actions">
+                <button class="btn secondary" id="btnAddTeacher">添加老师（模拟）</button>
+                <button class="btn ghost" id="btnPerm">查看权限说明</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        $('#btnInvite').addEventListener('click', () => setToast('已生成邀请（示例）'));
+        $('#btnApprove').addEventListener('click', () => setToast('已通过 student_001（示例）'));
+        $('#btnReject').addEventListener('click', () => setToast('已拒绝 student_001（示例）'));
+        $('#btnAddTeacher').addEventListener('click', () => setToast('已添加老师（示例）'));
+        $('#btnPerm').addEventListener('click', () => {
+          openModal({
+            title: '权限说明（示例）',
+            bodyHtml: `
+              <div class="helper">创建者：最高权限，可移除老师/关闭班级等。</div>
+              <div class="helper">普通老师：可管理学生、题库、任务（按配置）。</div>
+            `,
+            okText: '知道了',
+            cancelText: '关闭'
+          });
+        });
+      }
+
+      function renderTeacherBank(){
+        const aiOn = state.teacher.aiReviewOn;
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">题库管理</div>
+            <p class="p">可上传多个题库：数学、英语等。可打开/关闭、重传、开关AI自动审核。</p>
+            <div class="divider"></div>
+
+            <div class="card">
+              <div class="row wrap" style="justify-content:space-between">
+                <div>
+                  <div class="meta">题库</div>
+                  <div class="title">数学 · 题库A（示例）</div>
+                </div>
+                <div class="row wrap" style="justify-content:flex-end">
+                  <span class="tag good">已开启</span>
+                  <span class="tag brand">AI审核：${aiOn ? '开启' : '关闭'}</span>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn" id="btnUpload">重新上传题库</button>
+                <button class="btn secondary" id="btnToggle">切换 AI 自动审核</button>
+                <button class="btn ghost" id="btnFields">查看题目字段</button>
+              </div>
+            </div>
+
+            <div style="height:8px"></div>
+            <div class="card">
+              <div class="meta">题库</div>
+              <div class="title">英语 · 题库-01（示例）</div>
+              <div class="actions">
+                <button class="btn secondary" id="btnCloseBank">打开/关闭题库（模拟）</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        $('#btnUpload').addEventListener('click', () => setToast('已重新上传（示例）'));
+        $('#btnToggle').addEventListener('click', () => {
+          state.teacher.aiReviewOn = !state.teacher.aiReviewOn;
+          replace('t_bank');
+        });
+        $('#btnCloseBank').addEventListener('click', () => setToast('已切换题库开关（示例）'));
+        $('#btnFields').addEventListener('click', () => {
+          openModal({
+            title: '题库字段（按需求）',
+            bodyHtml: `
+              <div class="helper">① 类型：选择 / 填空 / 输入答案</div>
+              <div class="helper">② 科目：英语 / 数学</div>
+              <div class="helper">③ 难度：1~5</div>
+              <div class="helper">④ 题目</div>
+              <div class="helper">⑤ 选项（选择题）</div>
+              <div class="helper">⑥ 输入提示（填空/输入答案题）</div>
+              <div class="helper">⑦ 答案</div>
+              <div class="helper">⑧ 其他正确答案</div>
+              <div class="helper">⑨ 解释</div>
+            `,
+            okText: '关闭',
+            cancelText: '关闭'
+          });
+        });
+      }
+
+      function renderTeacherTaskMgmt(){
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">学习任务管理</div>
+            <p class="p">创建/管理任务，开关任务，查看学生在学习任务中的学习次数，以及所有学生做错题目的错题统计。</p>
+            <div class="divider"></div>
+
+            <div class="card">
+              <div class="meta">创建新任务（示例）</div>
+              <div class="title">填写参数：名称 / 题库号 / 难度概率 / 题目数量</div>
+              <div class="actions"><button class="btn" id="btnCreateTask">创建任务（模拟）</button></div>
+            </div>
+
+            <div style="height:8px"></div>
+            <div class="list">
+              <div class="card">
+                <div class="meta">任务：T2 · 数学题库A</div>
+                <div class="title">数学·方程练习(中级)</div>
+                <div class="actions">
+                  <span class="tag good">已开启</span>
+                  <span class="tag">学习次数 128</span>
+                  <span class="tag bad">错题次数 39</span>
+                  <button class="btn secondary" id="btnToggleTask">开关任务</button>
+                  <button class="btn" id="btnGoStats">查看错题统计</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        $('#btnCreateTask').addEventListener('click', () => {
+          openModal({
+            title: '创建任务（模拟）',
+            bodyHtml: `
+              <div class="field"><div class="label">① 名称</div><input class="input" value="数学·方程练习(中级)" /></div>
+              <div style="height:8px"></div>
+              <div class="field"><div class="label">② 参考题库号</div><input class="input" value="数学题库A" /></div>
+              <div style="height:8px"></div>
+              <div class="field"><div class="label">③ 难度选择（概率）</div><input class="input" value="{1:10%,2:20%,3:40%,4:20%,5:10%}" /></div>
+              <div style="height:8px"></div>
+              <div class="field"><div class="label">④ 题目数量</div><input class="input" value="10" /></div>
+            `,
+            okText: '创建',
+            cancelText: '取消',
+            onOk: () => setToast('已创建任务（示例）')
+          });
+        });
+
+        $('#btnToggleTask').addEventListener('click', () => setToast('已切换任务开关（示例）'));
+        $('#btnGoStats').addEventListener('click', () => push('t_wrong_stats'));
+      }
+
+      function renderTeacherWrongStats(){
+        screen.innerHTML = `
+          <div class="section">
+            <div class="h2">错题统计</div>
+            <p class="p">当前原型按“所有学生做错题目的累计统计”展示，可继续查看题目信息、错误学生和对应错误次数。</p>
+            <div class="divider"></div>
+
+            <div class="list">
+              ${[
+                {id:'Q2', stem:'x + 3 = 7，x = ?', students:21, totalWrong:39},
+                {id:'Q5', stem:'happy 的同义词', students:17, totalWrong:22},
+                {id:'Q4', stem:'哪个是质数？', students:9, totalWrong:11},
+              ].map(x => `
+                <div class="card">
+                  <div class="row wrap" style="justify-content:space-between">
+                    <div>
+                      <div class="meta">题目ID：${x.id}</div>
+                      <div class="title">${x.stem}</div>
+                    </div>
+                    <div class="row wrap" style="justify-content:flex-end">
+                      <span class="tag bad">错误次数 ${x.totalWrong}</span>
+                      <span class="tag">错误学生数 ${x.students}</span>
+                    </div>
+                  </div>
+                  <div class="actions">
+                    <button class="btn" data-view-q="${x.id}">查看题目信息</button>
+                    <button class="btn secondary" data-view-stu="${x.id}">查看错误学生</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        screen.querySelectorAll('[data-view-q]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-view-q');
+            openModal({
+              title: '题目信息（示例）',
+              bodyHtml: `
+                <div class="helper">题目ID：<span style="font:var(--text-code)">${id}</span></div>
+                <div class="helper">字段：类型/科目/难度/题目/选项/提示/答案/其他答案/解释</div>
+              `,
+              okText: '关闭',
+              cancelText: '关闭'
+            });
+          });
+        });
+
+        screen.querySelectorAll('[data-view-stu]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-view-stu');
+            openModal({
+              title: '错误学生列表（示例）',
+              bodyHtml: `
+                <div class="helper">题目：<span style="font:var(--text-code)">${id}</span></div>
+                <div class="divider"></div>
+                <div class="helper">student_001 · 错误次数 3</div>
+                <div class="helper">student_017 · 错误次数 2</div>
+                <div class="helper">student_021 · 错误次数 1</div>
+              `,
+              okText: '关闭',
+              cancelText: '关闭'
+            });
+          });
+        });
+      }
+
+      function render(routeId){
+        setHeader(routeId);
+        [...stepsEl.children].forEach(el => el.classList.toggle('active', el.getAttribute('data-route') === routeId));
+
+        switch(routeId){
+          case 'entry': renderEntry(); break;
+          case 's_join': renderStudentJoin(); break;
+          case 's_tasks': renderStudentTasks(); break;
+          case 's_task_detail': renderStudentTaskDetail(); break;
+          case 's_doing': renderStudentDoing(); break;
+          case 's_review': renderStudentReview(); break;
+          case 's_wrong': renderStudentWrong(); break;
+          case 't_login': renderTeacherLogin(); break;
+          case 't_home': renderTeacherHome(); break;
+          case 't_class': renderTeacherClass(); break;
+          case 't_bank': renderTeacherBank(); break;
+          case 't_task_mgmt': renderTeacherTaskMgmt(); break;
+          case 't_wrong_stats': renderTeacherWrongStats(); break;
+          default: renderEntry();
+        }
+
+        screen.querySelectorAll('[data-go="student"]').forEach(btn => {
+          btn.addEventListener('click', () => { state.role = 'student'; push('s_join'); });
+        });
+
+        screen.querySelectorAll('[data-go="teacher"]').forEach(btn => {
+          btn.addEventListener('click', () => { state.role = 'teacher'; push('t_login'); });
+        });
+      }
+
+      stepsEl.innerHTML = jumpList.map((s, i) => `
+        <div class="step" data-route="${s.id}">
+          <div class="k">${i + 1}</div>
+          <div class="t">
+            <div class="name">${s.name}</div>
+            <div class="desc">${s.desc}</div>
+          </div>
+        </div>
+      `).join('');
+
+      stepsEl.querySelectorAll('.step').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.getAttribute('data-route');
+          if (state.stack.length === 0) state.stack = ['entry'];
+          state.stack.push(id);
+          render(id);
+        });
+      });
+
+      btnBack.addEventListener('click', back);
+      btnReset.addEventListener('click', () => {
+        state.stack = [];
+        state.role = null;
+        state.className = null;
+        state.classCode = null;
+        state.taskId = null;
+        state.taskName = null;
+        state.quiz.idx = 0;
+        state.quiz.answers = {};
+        render('entry');
+        setToast('已重置');
+      });
+
+      state.stack = ['entry'];
+      render('entry');
+    })();
+  </script>
+</body>
+</html>
