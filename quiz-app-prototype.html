@@ -537,6 +537,7 @@
         <div class="title">做题 App（UniApp）交互原型</div>
         <div class="badges">
           <span class="pill">当前角色：<b id="badgeRole">未选择</b></span>
+          <span class="pill">学生姓名：<b id="badgeName">—</b></span>
           <span class="pill">当前班级：<b id="badgeClass">—</b></span>
           <span class="pill">当前任务：<b id="badgeTask">—</b></span>
         </div>
@@ -591,6 +592,7 @@
       const navTitle = $('#navTitle');
       const navChip = $('#navChip');
       const badgeRole = $('#badgeRole');
+      const badgeName = $('#badgeName');
       const badgeClass = $('#badgeClass');
       const badgeTask = $('#badgeTask');
       const btnBack = $('#btnBack');
@@ -608,6 +610,7 @@
       const state = {
         stack: [],
         role: null,
+        studentName: null,
         className: null,
         classCode: null,
         taskId: null,
@@ -619,7 +622,7 @@
           wrongIds: ['Q2', 'Q5']
         },
         teacher: {
-          currentBank: '数学-题库A',
+          currentBank: '英语-题库A',
           currentClass: '七年级(2)班',
           aiReviewOn: true
         }
@@ -651,7 +654,7 @@
         { id:'s_wrong', name:'错题集', desc:'错题回顾与再练' },
         { id:'t_login', name:'教师登录', desc:'账号登录入口' },
         { id:'t_home', name:'教师主页', desc:'班级/题库/任务/统计' },
-        { id:'t_class', name:'班级管理', desc:'邀请、审核学生，多老师' },
+        { id:'t_class', name:'班级管理', desc:'邀请、审核学生，查看学生' },
         { id:'t_bank', name:'题库管理', desc:'开关、重传、AI审核开关' },
         { id:'t_task_mgmt', name:'学习任务管理', desc:'查看学习次数与错题统计' },
         { id:'t_wrong_stats', name:'错题统计', desc:'所有学生做错题目统计' }
@@ -670,6 +673,7 @@
         navChip.textContent = r.chip;
 
         badgeRole.textContent = state.role ? (state.role === 'student' ? '学生' : '教师') : '未选择';
+        badgeName.textContent = (state.role === 'student' && state.studentName) ? state.studentName : '—';
         badgeClass.textContent = state.className ? state.className : '—';
         badgeTask.textContent = state.taskName ? state.taskName : '—';
 
@@ -733,11 +737,14 @@
         screen.innerHTML = `
           <div class="section">
             <div class="h2">加入班级</div>
-            <p class="p">两种方式：选择已有班级，或输入班级码。</p>
+            <p class="p">进入班级前需要输入姓名。两种进入方式：选择已有班级，或输入班级码。</p>
             <div class="divider"></div>
 
             <div class="grid2">
               <div class="field">
+                <div class="label">姓名</div>
+                <input class="input" id="studentName" placeholder="请输入你的姓名" value="${state.studentName || ''}" />
+                <div style="height:8px"></div>
                 <div class="label">班级码</div>
                 <input class="input" id="classCode" placeholder="例如：A1B2C3" value="${state.classCode || ''}" />
                 <div class="row wrap">
@@ -774,16 +781,21 @@
           </div>
         `;
 
+        const nameInput = $('#studentName');
         const codeInput = $('#classCode');
         $('#btnPaste').addEventListener('click', () => { codeInput.value = 'A1B2C3'; });
         $('#btnJoin').addEventListener('click', () => {
+          const name = (nameInput.value || '').trim();
+          if (!name){ setToast('请先输入姓名'); return; }
           const code = (codeInput.value || '').trim();
           if (!code){ setToast('请先输入班级码'); return; }
+          state.studentName = name;
           state.classCode = code;
           openModal({
             title: '加入班级申请',
             bodyHtml: `
-              <div class="helper">你输入的班级码：<span style="font:var(--text-code)">${code}</span></div>
+              <div class="helper">姓名：<b>${name}</b></div>
+              <div class="helper">班级码：<span style="font:var(--text-code)">${code}</span></div>
               <div class="divider"></div>
               <div class="choice"><input type="radio" name="join" checked /> <div><div style="font-weight:600">教师审核通过</div><div class="helper">进入班级并看到任务</div></div></div>
               <div style="height:8px"></div>
@@ -801,6 +813,9 @@
 
         screen.querySelectorAll('[data-pick-class]').forEach(btn => {
           btn.addEventListener('click', () => {
+            const name = (nameInput.value || '').trim();
+            if (!name){ setToast('请先输入姓名'); return; }
+            state.studentName = name;
             state.className = btn.getAttribute('data-pick-class');
             state.classCode = null;
             setToast('进入班级：' + state.className);
@@ -835,7 +850,7 @@
             <div class="list">
               ${[
                 {id:'T1', name:'英语·词汇训练(初级)', bank:'英语题库-01', num:10, diff:'1~2', open:true},
-                {id:'T2', name:'数学·方程练习(中级)', bank:'数学题库A', num:8, diff:'3~4', open:true},
+                {id:'T2', name:'语文·基础训练(中级)', bank:'语文题库A', num:8, diff:'2~3', open:true},
                 {id:'T3', name:'英语·阅读理解(高级)', bank:'英语题库-02', num:6, diff:'4~5', open:false},
               ].map(t => `
                 <div class="card">
@@ -866,7 +881,7 @@
           btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-open-task');
             state.taskId = id;
-            state.taskName = id === 'T1' ? '英语·词汇训练(初级)' : (id === 'T2' ? '数学·方程练习(中级)' : '英语·阅读理解(高级)');
+            state.taskName = id === 'T1' ? '英语·词汇训练(初级)' : (id === 'T2' ? '语文·基础训练(中级)' : '英语·阅读理解(高级)');
             push('s_task_detail');
           });
         });
@@ -875,7 +890,7 @@
           btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-open-wrong');
             state.taskId = id;
-            state.taskName = id === 'T1' ? '英语·词汇训练(初级)' : (id === 'T2' ? '数学·方程练习(中级)' : '英语·阅读理解(高级)');
+            state.taskName = id === 'T1' ? '英语·词汇训练(初级)' : (id === 'T2' ? '语文·基础训练(中级)' : '英语·阅读理解(高级)');
             push('s_wrong');
           });
         });
@@ -922,11 +937,11 @@
 
       function questionFixture(i){
         const items = [
-          { id:'Q1', type:'选择题', subject:'英语', diff:1, stem:'选择正确的单词拼写', options:['appple','apple','aple','appel'], hint:'', answer:'apple' },
-          { id:'Q2', type:'填空', subject:'数学', diff:3, stem:'解方程：x + 3 = 7，x = ?', options:null, hint:'请输入数字', answer:'4' },
-          { id:'Q3', type:'输入答案', subject:'英语', diff:2, stem:'翻译：good morning（中文）', options:null, hint:'请输入中文', answer:'早上好' },
-          { id:'Q4', type:'选择题', subject:'数学', diff:4, stem:'下列哪个是质数？', options:['9','15','17','21'], hint:'', answer:'17' },
-          { id:'Q5', type:'输入答案', subject:'英语', diff:3, stem:'写出一个“happy”的同义词', options:null, hint:'例如：glad', answer:'glad' },
+          { id:'Q1', qtype:'读', type:'选择题', subject:'英语', diff:1, stem:'选择正确的单词拼写', options:['appple','apple','aple','appel'], hint:'', answer:'apple' },
+          { id:'Q2', qtype:'写', type:'填空', subject:'语文', diff:2, stem:'填空：成语“___耳盗铃”', options:null, hint:'请输入两个字', answer:'掩' },
+          { id:'Q3', qtype:'听', type:'输入答案', subject:'英语', diff:2, stem:'听力题（示例）：播放音频后写出你听到的句子', options:null, hint:'请输入英文句子', answer:'good morning' },
+          { id:'Q4', qtype:'读', type:'选择题', subject:'语文', diff:3, stem:'下列哪个词语书写正确？', options:['乌合之众','乌合之众（误）','乌合之众（误2）','乌合之众（误3）'], hint:'', answer:'乌合之众' },
+          { id:'Q5', qtype:'写', type:'输入答案', subject:'英语', diff:3, stem:'写出一个“happy”的同义词', options:null, hint:'例如：glad', answer:'glad' },
         ];
         return items[i] || items[0];
       }
@@ -976,6 +991,8 @@
             <div class="question">
               <div class="qtitle">${q.stem}</div>
               <div class="qmeta">
+                <span class="tag">题目类型 ${q.qtype || '—'}</span>
+                <span class="tag">做题方式 ${q.type}</span>
                 <span class="tag">科目 ${q.subject}</span>
                 <span class="tag">难度 ${q.diff}</span>
                 <span class="tag ${state.quiz.wrongIds.includes(q.id)?'bad':'good'}">${state.quiz.wrongIds.includes(q.id)?'高概率错题':'普通'}</span>
@@ -1037,11 +1054,11 @@
             <div class="section" style="background:var(--surface-muted)">
               <div class="h2">批阅示例（2条）</div>
               <div class="card">
-                <div class="meta">Q2 · 填空 · 数学</div>
+                <div class="meta">Q2 · 填空 · 语文</div>
                 <div class="title">AI点评：步骤正确但最终答案填写错误</div>
                 <div class="actions">
                   <span class="tag bad">判定：错</span>
-                  <span class="tag">正确答案：4</span>
+                  <span class="tag">正确答案：掩</span>
                   <span class="tag">你的答案：${state.quiz.answers['Q2'] || '（空）'}</span>
                 </div>
               </div>
@@ -1167,7 +1184,7 @@
               <button class="btn" id="btnLogin">登录进入教师端</button>
               <button class="btn secondary" id="btnCreateClass">首次：创建班级（模拟）</button>
             </div>
-            <div class="helper" style="margin-top:8px">班级可多老师，创建者最高权限（演示用）。</div>
+            <div class="helper" style="margin-top:8px">班级只有创建者一个老师（演示用）。</div>
           </div>
         `;
 
@@ -1206,7 +1223,7 @@
             <div class="divider"></div>
 
             <div class="grid2">
-              <div class="kpi"><div class="v">2</div><div class="l">班级老师数（示例）</div></div>
+              <div class="kpi"><div class="v">1</div><div class="l">老师数（创建者）</div></div>
               <div class="kpi"><div class="v">38</div><div class="l">学生数（示例）</div></div>
             </div>
 
@@ -1214,7 +1231,7 @@
             <div class="list">
               <div class="card">
                 <div class="meta">班级</div>
-                <div class="title">管理班级：邀请/审核学生，多老师权限</div>
+                <div class="title">管理班级：邀请/审核学生，查看所有学生</div>
                 <div class="actions"><button class="btn" data-go="t_class">进入班级管理</button></div>
               </div>
               <div class="card">
@@ -1243,7 +1260,7 @@
         screen.innerHTML = `
           <div class="section">
             <div class="h2">班级管理</div>
-            <p class="p">班级：${state.teacher.currentClass}（创建者最高权限）</p>
+            <p class="p">班级：${state.teacher.currentClass}（班级只有创建者一个老师）</p>
             <div class="divider"></div>
 
             <div class="card">
@@ -1267,11 +1284,11 @@
 
             <div style="height:8px"></div>
             <div class="card">
-              <div class="meta">班级老师（示例）</div>
-              <div class="title">创建者 teacher_demo + 老师 teacher_02</div>
+              <div class="meta">所有学生（示例）</div>
+              <div class="title">student_001 / student_017 / student_021 ...</div>
               <div class="actions">
-                <button class="btn secondary" id="btnAddTeacher">添加老师（模拟）</button>
-                <button class="btn ghost" id="btnPerm">查看权限说明</button>
+                <button class="btn secondary" id="btnViewStudents">查看学生列表（模拟）</button>
+                <button class="btn ghost" id="btnStudentInfo">查看学生信息（模拟）</button>
               </div>
             </div>
           </div>
@@ -1280,15 +1297,16 @@
         $('#btnInvite').addEventListener('click', () => setToast('已生成邀请（示例）'));
         $('#btnApprove').addEventListener('click', () => setToast('已通过 student_001（示例）'));
         $('#btnReject').addEventListener('click', () => setToast('已拒绝 student_001（示例）'));
-        $('#btnAddTeacher').addEventListener('click', () => setToast('已添加老师（示例）'));
-        $('#btnPerm').addEventListener('click', () => {
+        $('#btnViewStudents').addEventListener('click', () => setToast('已打开学生列表（示例）'));
+        $('#btnStudentInfo').addEventListener('click', () => {
           openModal({
-            title: '权限说明（示例）',
+            title: '学生信息（示例）',
             bodyHtml: `
-              <div class="helper">创建者：最高权限，可移除老师/关闭班级等。</div>
-              <div class="helper">普通老师：可管理学生、题库、任务（按配置）。</div>
+              <div class="helper">student_017</div>
+              <div class="helper">加入时间：2026-07-14（示例）</div>
+              <div class="helper">累计学习次数：12（示例）</div>
             `,
-            okText: '知道了',
+            okText: '关闭',
             cancelText: '关闭'
           });
         });
@@ -1299,14 +1317,14 @@
         screen.innerHTML = `
           <div class="section">
             <div class="h2">题库管理</div>
-            <p class="p">可上传多个题库：数学、英语等。可打开/关闭、重传、开关AI自动审核。</p>
+            <p class="p">可上传多个题库：英语、语文等。题库可打开/关闭、重传、开关AI自动审核。</p>
             <div class="divider"></div>
 
             <div class="card">
               <div class="row wrap" style="justify-content:space-between">
                 <div>
                   <div class="meta">题库</div>
-                  <div class="title">数学 · 题库A（示例）</div>
+                  <div class="title">英语 · 题库A（示例）</div>
                 </div>
                 <div class="row wrap" style="justify-content:flex-end">
                   <span class="tag good">已开启</span>
@@ -1323,7 +1341,7 @@
             <div style="height:8px"></div>
             <div class="card">
               <div class="meta">题库</div>
-              <div class="title">英语 · 题库-01（示例）</div>
+              <div class="title">语文 · 题库-01（示例）</div>
               <div class="actions">
                 <button class="btn secondary" id="btnCloseBank">打开/关闭题库（模拟）</button>
               </div>
@@ -1341,15 +1359,16 @@
           openModal({
             title: '题库字段（按需求）',
             bodyHtml: `
-              <div class="helper">① 类型：选择 / 填空 / 输入答案</div>
-              <div class="helper">② 科目：英语 / 数学</div>
-              <div class="helper">③ 难度：1~5</div>
-              <div class="helper">④ 题目</div>
-              <div class="helper">⑤ 选项（选择题）</div>
-              <div class="helper">⑥ 输入提示（填空/输入答案题）</div>
-              <div class="helper">⑦ 答案</div>
-              <div class="helper">⑧ 其他正确答案</div>
-              <div class="helper">⑨ 解释</div>
+              <div class="helper">① 题目类型：听 / 写 / 读</div>
+              <div class="helper">② 做题方式：选择 / 填空 / 输入答案</div>
+              <div class="helper">③ 科目：英语 / 语文</div>
+              <div class="helper">④ 难度：1~5</div>
+              <div class="helper">⑤ 题目</div>
+              <div class="helper">⑥ 选项（选择题）</div>
+              <div class="helper">⑦ 输入提示（填空/输入答案题）</div>
+              <div class="helper">⑧ 参考答案（如果是听/写则会有参考答案）</div>
+              <div class="helper">⑨ 其他正确答案</div>
+              <div class="helper">⑩ 解释</div>
             `,
             okText: '关闭',
             cancelText: '关闭'
@@ -1373,8 +1392,8 @@
             <div style="height:8px"></div>
             <div class="list">
               <div class="card">
-                <div class="meta">任务：T2 · 数学题库A</div>
-                <div class="title">数学·方程练习(中级)</div>
+                <div class="meta">任务：T2 · 语文题库A</div>
+                <div class="title">语文·基础训练(中级)</div>
                 <div class="actions">
                   <span class="tag good">已开启</span>
                   <span class="tag">学习次数 128</span>
@@ -1391,9 +1410,9 @@
           openModal({
             title: '创建任务（模拟）',
             bodyHtml: `
-              <div class="field"><div class="label">① 名称</div><input class="input" value="数学·方程练习(中级)" /></div>
+              <div class="field"><div class="label">① 名称</div><input class="input" value="语文·基础训练(中级)" /></div>
               <div style="height:8px"></div>
-              <div class="field"><div class="label">② 参考题库号</div><input class="input" value="数学题库A" /></div>
+              <div class="field"><div class="label">② 参考题库号</div><input class="input" value="语文题库A" /></div>
               <div style="height:8px"></div>
               <div class="field"><div class="label">③ 难度选择（概率）</div><input class="input" value="{1:10%,2:20%,3:40%,4:20%,5:10%}" /></div>
               <div style="height:8px"></div>
@@ -1450,7 +1469,7 @@
               title: '题目信息（示例）',
               bodyHtml: `
                 <div class="helper">题目ID：<span style="font:var(--text-code)">${id}</span></div>
-                <div class="helper">字段：类型/科目/难度/题目/选项/提示/答案/其他答案/解释</div>
+                <div class="helper">字段：题目类型/做题方式/科目/难度/题目/选项/输入提示/参考答案/其他正确答案/解释</div>
               `,
               okText: '关闭',
               cancelText: '关闭'
@@ -1530,6 +1549,7 @@
       btnReset.addEventListener('click', () => {
         state.stack = [];
         state.role = null;
+        state.studentName = null;
         state.className = null;
         state.classCode = null;
         state.taskId = null;
