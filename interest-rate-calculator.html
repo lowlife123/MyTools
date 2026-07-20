@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>利率计算工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .segment-btn, .action-btn, .field-input {
+            transition: all 0.2s ease;
+        }
+        .segment-btn:focus-visible,
+        .action-btn:focus-visible,
+        .field-input:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center py-10 px-4">
+    <div class="w-full max-w-6xl mb-6">
+        <a href="index.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            返回首页
+        </a>
+    </div>
+
+    <div class="w-full max-w-6xl bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-8 py-8 text-white">
+            <div class="max-w-3xl">
+                <p class="text-sm uppercase tracking-[0.3em] text-blue-100">Interest Tool</p>
+                <h1 class="text-3xl md:text-4xl font-bold mt-3">利率计算工具</h1>
+                <p class="mt-3 text-sm md:text-base text-blue-50">支持长线/短线、通过利息算利率或通过利率算利息，并可切换单利与复利口径。</p>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8 space-y-6">
+            <section id="modePanel" class="space-y-4"></section>
+            <section id="modeDescription" class="rounded-2xl bg-blue-50 border border-blue-100 p-5 text-sm leading-6 text-blue-900"></section>
+            <section id="errorBox" class="hidden rounded-2xl bg-red-50 border border-red-100 p-4 text-sm text-red-700"></section>
+            <section id="formPanel" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></section>
+            <section class="flex flex-wrap gap-3">
+                <button id="calculateBtn" type="button" class="action-btn inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-white font-semibold shadow-sm hover:bg-blue-700">
+                    开始计算
+                </button>
+                <button id="resetBtn" type="button" class="action-btn inline-flex items-center justify-center rounded-xl bg-gray-100 px-5 py-3 text-gray-700 font-semibold hover:bg-gray-200">
+                    重置默认值
+                </button>
+            </section>
+            <section id="resultPanel" class="hidden space-y-4"></section>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            termType: 'short',
+            calcDirection: 'rateFromInterest',
+            interestType: 'simple',
+            longMode: 'totalInterest',
+            repaymentType: 'equalInstallment',
+            periodUnit: 'day'
+        };
+
+        let formValues = {};
+
+        const segmentDefinitions = [
+            {
+                label: '计算场景',
+                name: 'termType',
+                options: [
+                    { value: 'short', label: '短线利率' },
+                    { value: 'long', label: '长线利率' }
+                ]
+            },
+            {
+                label: '计算方向',
+                name: 'calcDirection',
+                options: [
+                    { value: 'rateFromInterest', label: '通过利息算利率' },
+                    { value: 'interestFromRate', label: '通过利率算利息' }
+                ]
+            },
+            {
+                label: '计息口径',
+                name: 'interestType',
+                options: [
+                    { value: 'simple', label: '单利' },
+                    { value: 'compound', label: '复利' }
+                ]
+            }
+        ];
+
+        function formatPercentInput(value) {
+            return Number(value.toFixed(6));
+        }
+
+        function calculateEqualInstallmentPayment(principal, monthlyRate, months) {
+            if (Math.abs(monthlyRate) < 1e-12) {
+                return principal / months;
+            }
+            const factor = Math.pow(1 + monthlyRate, months);
+            return principal * monthlyRate * factor / (factor - 1);
+        }
+
+        function calculateEqualPrincipalTotalInterest(principal, monthlyRate, months) {
+            return monthlyRate * principal * (months + 1) / 2;
+        }
+
+        function getDefaultValues() {
+            if (state.termType === 'short' && state.interestType === 'simple') {
+                return {
+                    principal: 100000,
+                    period: 30,
+                    periodUnit: 'day',
+                    interestAmount: 1000,
+                    annualRate: 12.166667
+                };
+            }
+
+            if (state.termType === 'short' && state.interestType === 'compound') {
+                const principal = 50000;
+                const annualRate = 0.06;
+                const periods = 12;
+                const totalAmount = principal * Math.pow(1 + annualRate / 12, periods);
+                return {
+                    principal,
+                    period: periods,
+                    periodUnit: 'month',
+                    interestAmount: Number((totalAmount - principal).toFixed(2)),
+                    annualRate: 6
+                };
+            }
+
+            if (state.termType === 'long' && state.longMode === 'totalInterest' && state.interestType === 'simple') {
+                return {
+                    principal: 300000,
+                    termMonths: 36,
+                    interestAmount: 27000,
+                    annualRate: 3,
+                    compoundTimesPerYear: '1'
+                };
+            }
+
+            if (state.termType === 'long' && state.longMode === 'totalInterest' && state.interestType === 'compound') {
+                const principal = 300000;
+                const annualRate = 0.045;
+                const termMonths = 36;
+                const years = termMonths / 12;
+                const compoundTimesPerYear = 12;
+                const totalAmount = principal * Math.pow(1 + annualRate / compoundTimesPerYear, compoundTimesPerYear * years);
+                return {
+                    principal,
+                    termMonths,
+                    interestAmount: Number((totalAmount - principal).toFixed(2)),
+                    annualRate: 4.5,
+                    compoundTimesPerYear: String(compoundTimesPerYear)
+                };
+            }
+
+            if (state.termType === 'long' && state.longMode === 'monthlyPayment' && state.repaymentType === 'equalPrincipal') {
+                const principal = 500000;
+                const termMonths = 360;
+                const annualRate = 3.85;
+                const monthlyRate = annualRate / 100 / 12;
+                return {
+                    principal,
+                    termMonths,
+                    interestAmount: Number(calculateEqualPrincipalTotalInterest(principal, monthlyRate, termMonths).toFixed(2)),
+                    annualRate
+                };
+            }
+
+            const principal = 500000;
+            const termMonths = 360;
+            const annualRate = 3.85;
+            const monthlyRate = annualRate / 100 / 12;
+            return {
+                principal,
+                termMonths,
+                paymentAmount: Number(calculateEqualInstallmentPayment(principal, monthlyRate, termMonths).toFixed(2)),
+                annualRate
+            };
+        }
+
+        function toNumber(value) {
+            const num = parseFloat(value);
+            return Number.isFinite(num) ? num : 0;
+        }
+
+        function isEmptyValue(value) {
+            return value === '' || value === null || typeof value === 'undefined';
+        }
+
+        function formatMoney(value) {
+            return `¥ ${Number(value).toLocaleString('zh-CN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+
+        function formatRate(rate) {
+            return `${(rate * 100).toFixed(4)}%`;
+        }
+
+        function normalizeRateFromAnnual(annualRate) {
+            return {
+                annualRate,
+                monthlyRate: annualRate / 12,
+                dailyRate: annualRate / 365
+            };
+        }
+
+        function rateToAnnual(rate, unit) {
+            if (unit === 'month') return rate * 12;
+            if (unit === 'day') return rate * 365;
+            return rate;
+        }
+
+        function annualToUnitRate(annualRate, unit) {
+            if (unit === 'month') return annualRate / 12;
+            if (unit === 'day') return annualRate / 365;
+            return annualRate;
+        }
+
+        function getPeriodHint(unit) {
+            if (unit === 'year') return '按年：输入的利率和期限都按年口径计算。';
+            if (unit === 'month') return '按月：输入的利率和期限都按月口径计算。';
+            return '按日：输入的利率和期限都按日口径计算，结果会同时换算成年化参考。';
+        }
+
+        function getCurrentUnitLabel(unit) {
+            if (unit === 'year') return '当前年利率';
+            if (unit === 'month') return '当前月利率';
+            return '当前日利率';
+        }
+
+        function getCurrentUnitName(unit) {
+            if (unit === 'year') return '按年';
+            if (unit === 'month') return '按月';
+            return '按日';
+        }
+
+        function renderSegment(section) {
+            return `
+                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-gray-500">${section.label}</p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        ${section.options.map((option) => `
+                            <button
+                                type="button"
+                                data-segment="${section.name}"
+                                data-value="${option.value}"
+                                class="segment-btn rounded-full border px-4 py-2 text-sm font-medium ${state[section.name] === option.value ? 'border-blue-600 bg-blue-600 text-white shadow-sm' : 'border-gray-300 bg-white text-gray-700 hover:border-blue-300 hover:text-blue-600'}"
+                            >
+                                ${option.label}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderModePanel() {
+            const sections = [...segmentDefinitions];
+
+            if (state.termType === 'long') {
+                sections.push({
+                    label: '长线模式',
+                    name: 'longMode',
+                    options: [
+                        { value: 'totalInterest', label: '总利息模式' },
+                        { value: 'monthlyPayment', label: '月供模式' }
+                    ]
+                });
+                if (state.longMode === 'monthlyPayment') {
+                    sections.push({
+                        label: '还款方式',
+                        name: 'repaymentType',
+                        options: [
+                            { value: 'equalInstallment', label: '等额本息' },
+                            { value: 'equalPrincipal', label: '等额本金' }
+                        ]
+                    });
+                }
+            }
+
+            document.getElementById('modePanel').innerHTML = sections.map(renderSegment).join('');
+        }
+
+        function getModeDescription() {
+            if (state.termType === 'short') {
+                const calcLabel = state.calcDirection === 'rateFromInterest' ? '根据本金、利息和期限反推利率' : '根据本金、利率和期限推算利息';
+                const interestLabel = state.interestType === 'simple' ? '单利' : '复利';
+                return `${calcLabel}，当前使用 ${interestLabel} 口径；切换到 ${getCurrentUnitName(state.periodUnit)} 时，会同步展示年利率、月利率和日利率参考值。`;
+            }
+
+            if (state.longMode === 'monthlyPayment' && state.repaymentType === 'equalInstallment') {
+                return '适合房贷、车贷的等额本息场景，可通过月供反推年利率，也可通过年利率计算月供、总利息和总还款。';
+            }
+
+            if (state.longMode === 'monthlyPayment' && state.repaymentType === 'equalPrincipal') {
+                return '适合等额本金贷款场景，第一版支持通过总利息反推利率，或根据年利率计算总利息、首月月供和最后月供。';
+            }
+
+            if (state.interestType === 'compound') {
+                return '适合长期复利滚存计息场景，可设置每年计息次数，通过总利息与本息合计反推或计算年利率。';
+            }
+
+            return '适合房贷、车贷或长期分期的总利息场景，根据本金、总利息和总期数互相换算年利率与总利息。';
+        }
+
+        function getFieldConfig() {
+            const fields = [
+                {
+                    id: 'principal',
+                    label: '本金（元）',
+                    type: 'number',
+                    step: '0.01',
+                    placeholder: '例如：100000'
+                }
+            ];
+
+            if (state.termType === 'short') {
+                fields.push(
+                    {
+                        id: 'period',
+                        label: '期限',
+                        type: 'number',
+                        step: '0.01',
+                        placeholder: '例如：30'
+                    },
+                    {
+                        id: 'periodUnit',
+                        label: '期限单位',
+                        type: 'select',
+                        options: [
+                            { value: 'year', label: '按年' },
+                            { value: 'month', label: '按月' },
+                            { value: 'day', label: '按日' }
+                        ],
+                        helpText: getPeriodHint(formValues.periodUnit || state.periodUnit)
+                    }
+                );
+            } else {
+                fields.push({
+                    id: 'termMonths',
+                    label: '总期数（月）',
+                    type: 'number',
+                    step: '1',
+                    placeholder: '例如：360'
+                });
+            }
+
+            if (state.termType === 'long' && state.longMode === 'monthlyPayment') {
+                if (state.repaymentType === 'equalInstallment') {
+                    fields.push({
+                        id: state.calcDirection === 'rateFromInterest' ? 'paymentAmount' : 'annualRate',
+                        label: state.calcDirection === 'rateFromInterest' ? '月供（元）' : '年利率（%）',
+                        type: 'number',
+                        step: '0.01',
+                        placeholder: state.calcDirection === 'rateFromInterest' ? '例如：2346.54' : '例如：3.85'
+                    });
+                } else {
+                    fields.push({
+                        id: state.calcDirection === 'rateFromInterest' ? 'interestAmount' : 'annualRate',
+                        label: state.calcDirection === 'rateFromInterest' ? '总利息（元）' : '年利率（%）',
+                        type: 'number',
+                        step: '0.01',
+                        placeholder: state.calcDirection === 'rateFromInterest' ? '例如：289270.83' : '例如：3.85'
+                    });
+                }
+                return fields;
+            }
+
+            if (state.termType === 'long' && state.interestType === 'compound') {
+                fields.push({
+                    id: 'compoundTimesPerYear',
+                    label: '每年计息次数',
+                    type: 'select',
+                    options: [
+                        { value: '1', label: '1 次/年' },
+                        { value: '2', label: '2 次/年' },
+                        { value: '4', label: '4 次/年' },
+                        { value: '12', label: '12 次/年' },
+                        { value: '365', label: '365 次/年' }
+                    ],
+                    helpText: '复利模式下会按照每年计息次数滚存计算。'
+                });
+            }
+
+            fields.push({
+                id: state.calcDirection === 'rateFromInterest' ? 'interestAmount' : 'annualRate',
+                label: state.calcDirection === 'rateFromInterest' ? (state.termType === 'long' ? '总利息（元）' : '利息（元）') : '年利率（%）',
+                type: 'number',
+                step: '0.01',
+                placeholder: state.calcDirection === 'rateFromInterest' ? '例如：1000' : '例如：6'
+            });
+
+            return fields;
+        }
+
+        function renderField(field) {
+            const value = formValues[field.id] ?? '';
+            const helpText = field.helpText ? `<p class="mt-2 text-xs leading-5 text-gray-500">${field.helpText}</p>` : '';
+
+            if (field.type === 'select') {
+                return `
+                    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                        <label for="${field.id}" class="block text-sm font-medium text-gray-700">${field.label}</label>
+                        <select id="${field.id}" data-field="${field.id}" class="field-input mt-2 block w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-blue-500">
+                            ${field.options.map((option) => `
+                                <option value="${option.value}" ${String(value) === option.value ? 'selected' : ''}>${option.label}</option>
+                            `).join('')}
+                        </select>
+                        ${helpText}
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <label for="${field.id}" class="block text-sm font-medium text-gray-700">${field.label}</label>
+                    <input
+                        id="${field.id}"
+                        data-field="${field.id}"
+                        type="number"
+                        step="${field.step || '0.01'}"
+                        min="0"
+                        value="${value}"
+                        placeholder="${field.placeholder || ''}"
+                        class="field-input mt-2 block w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-blue-500"
+                    >
+                    ${helpText}
+                </div>
+            `;
+        }
+
+        function renderForm() {
+            const fields = getFieldConfig();
+            document.getElementById('formPanel').innerHTML = fields.map(renderField).join('');
+            document.getElementById('modeDescription').textContent = getModeDescription();
+        }
+
+        function resetDefaults() {
+            formValues = getDefaultValues();
+            state.periodUnit = formValues.periodUnit || state.periodUnit;
+            clearError();
+            hideResults();
+            renderApp();
+        }
+
+        function renderApp() {
+            renderModePanel();
+            renderForm();
+        }
+
+        function showError(message) {
+            const box = document.getElementById('errorBox');
+            box.textContent = message;
+            box.classList.remove('hidden');
+        }
+
+        function clearError() {
+            const box = document.getElementById('errorBox');
+            box.textContent = '';
+            box.classList.add('hidden');
+        }
+
+        function hideResults() {
+            const panel = document.getElementById('resultPanel');
+            panel.innerHTML = '';
+            panel.classList.add('hidden');
+        }
+
+        function getInputValues() {
+            return { ...getDefaultValues(), ...formValues };
+        }
+
+        function validateInputs(values) {
+            const principal = toNumber(values.principal);
+            if (principal <= 0) return '本金必须大于 0';
+
+            if (state.termType === 'short') {
+                if (toNumber(values.period) <= 0) return '期限必须大于 0';
+            }
+
+            if (state.termType === 'long') {
+                const termMonths = toNumber(values.termMonths);
+                if (!Number.isInteger(termMonths) || termMonths <= 0) return '总期数必须是大于 0 的整数';
+            }
+
+            if (state.calcDirection === 'rateFromInterest') {
+                if (state.termType === 'long' && state.longMode === 'monthlyPayment' && state.repaymentType === 'equalInstallment') {
+                    if (toNumber(values.paymentAmount) <= 0) return '月供必须大于 0';
+                } else if (toNumber(values.interestAmount) <= 0) {
+                    return state.termType === 'short' ? '利息必须大于 0' : '总利息必须大于 0';
+                }
+            } else if (isEmptyValue(values.annualRate)) {
+                return '请先填写年利率';
+            } else if (toNumber(values.annualRate) < 0) {
+                return '利率不能小于 0';
+            }
+
+            if (state.termType === 'long' && state.interestType === 'compound' && state.longMode === 'totalInterest' && toNumber(values.compoundTimesPerYear) <= 0) {
+                return '每年计息次数必须大于 0';
+            }
+
+            if (state.termType === 'long' && state.longMode === 'monthlyPayment' && state.repaymentType === 'equalInstallment' && state.calcDirection === 'rateFromInterest') {
+                if (toNumber(values.paymentAmount) <= principal / toNumber(values.termMonths)) {
+                    return '该月供不足以覆盖合理贷款利率场景，请检查月供或期数。';
+                }
+            }
+
+            return '';
+        }
+
+        function solveByBisection(getValueAtRate, target, low = 0, high = 1, maxIterations = 200, epsilon = 1e-10) {
+            let left = low;
+            let right = high;
+
+            while (getValueAtRate(right) < target) {
+                right *= 2;
+                if (right > 100) {
+                    throw new Error('无法在合理区间内找到有效利率，请检查输入值是否合理。');
+                }
+            }
+
+            for (let i = 0; i < maxIterations; i += 1) {
+                const mid = (left + right) / 2;
+                const value = getValueAtRate(mid);
+
+                if (Math.abs(value - target) <= epsilon) {
+                    return mid;
+                }
+
+                if (value < target) {
+                    left = mid;
+                } else {
+                    right = mid;
+                }
+            }
+
+            return (left + right) / 2;
+        }
+
+        function renderResults(result) {
+            const panel = document.getElementById('resultPanel');
+            panel.innerHTML = `
+                <div class="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-lg">
+                    <p class="text-sm uppercase tracking-[0.25em] text-blue-100">${result.primaryLabel}</p>
+                    <p class="mt-3 text-3xl font-bold">${result.primaryValue}</p>
+                    ${result.summary ? `<p class="mt-3 text-sm text-blue-100">${result.summary}</p>` : ''}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    ${result.items.map((item) => `
+                        <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                            <p class="text-sm text-gray-500">${item.label}</p>
+                            <p class="mt-2 text-xl font-semibold text-gray-900">${item.value}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            panel.classList.remove('hidden');
+        }
+
+        function calculateShortSimple(values) {
+            const principal = toNumber(values.principal);
+            const period = toNumber(values.period);
+            const periodUnit = values.periodUnit;
+
+            if (state.calcDirection === 'rateFromInterest') {
+                const currentRate = toNumber(values.interestAmount) / (principal * period);
+                const annualRate = rateToAnnual(currentRate, periodUnit);
+                const converted = normalizeRateFromAnnual(annualRate);
+                return {
+                    primaryLabel: '推算年利率',
+                    primaryValue: formatRate(converted.annualRate),
+                    summary: `当前按 ${getCurrentUnitName(periodUnit)} 单利口径反推利率，并同步换算年/月/日利率。`,
+                    items: [
+                        { label: getCurrentUnitLabel(periodUnit), value: formatRate(currentRate) },
+                        { label: '月利率', value: formatRate(converted.monthlyRate) },
+                        { label: '日利率', value: formatRate(converted.dailyRate) },
+                        { label: '总利息', value: formatMoney(toNumber(values.interestAmount)) },
+                        { label: '本息合计', value: formatMoney(principal + toNumber(values.interestAmount)) }
+                    ]
+                };
+            }
+
+            const annualRate = toNumber(values.annualRate) / 100;
+            const currentRate = annualToUnitRate(annualRate, periodUnit);
+            const interest = principal * currentRate * period;
+            return {
+                primaryLabel: '推算总利息',
+                primaryValue: formatMoney(interest),
+                summary: `当前按 ${getCurrentUnitName(periodUnit)} 单利口径计算利息。`,
+                items: [
+                    { label: getCurrentUnitLabel(periodUnit), value: formatRate(currentRate) },
+                    { label: '年利率', value: formatRate(annualRate) },
+                    { label: '月利率', value: formatRate(annualRate / 12) },
+                    { label: '日利率', value: formatRate(annualRate / 365) },
+                    { label: '本息合计', value: formatMoney(principal + interest) }
+                ]
+            };
+        }
+
+        function calculateShortCompound(values) {
+            const principal = toNumber(values.principal);
+            const periods = toNumber(values.period);
+            const periodUnit = values.periodUnit;
+
+            if (state.calcDirection === 'rateFromInterest') {
+                const totalAmount = principal + toNumber(values.interestAmount);
+                const currentRate = Math.pow(totalAmount / principal, 1 / periods) - 1;
+                const annualRate = rateToAnnual(currentRate, periodUnit);
+                const converted = normalizeRateFromAnnual(annualRate);
+                return {
+                    primaryLabel: '推算年利率',
+                    primaryValue: formatRate(converted.annualRate),
+                    summary: `当前按 ${getCurrentUnitName(periodUnit)} 复利口径反推利率。`,
+                    items: [
+                        { label: getCurrentUnitLabel(periodUnit), value: formatRate(currentRate) },
+                        { label: '月利率', value: formatRate(converted.monthlyRate) },
+                        { label: '日利率', value: formatRate(converted.dailyRate) },
+                        { label: '总利息', value: formatMoney(toNumber(values.interestAmount)) },
+                        { label: '本息合计', value: formatMoney(totalAmount) }
+                    ]
+                };
+            }
+
+            const annualRate = toNumber(values.annualRate) / 100;
+            const currentRate = annualToUnitRate(annualRate, periodUnit);
+            const totalAmount = principal * Math.pow(1 + currentRate, periods);
+            const interest = totalAmount - principal;
+            return {
+                primaryLabel: '推算总利息',
+                primaryValue: formatMoney(interest),
+                summary: `当前按 ${getCurrentUnitName(periodUnit)} 复利口径计算利息。`,
+                items: [
+                    { label: getCurrentUnitLabel(periodUnit), value: formatRate(currentRate) },
+                    { label: '年利率', value: formatRate(annualRate) },
+                    { label: '月利率', value: formatRate(annualRate / 12) },
+                    { label: '日利率', value: formatRate(annualRate / 365) },
+                    { label: '本息合计', value: formatMoney(totalAmount) }
+                ]
+            };
+        }
+
+        function calculateLongSimpleTotal(values) {
+            const principal = toNumber(values.principal);
+            const years = toNumber(values.termMonths) / 12;
+
+            if (state.calcDirection === 'rateFromInterest') {
+                const annualRate = toNumber(values.interestAmount) / principal / years;
+                return {
+                    primaryLabel: '推算年利率',
+                    primaryValue: formatRate(annualRate),
+                    summary: '当前使用长线单利总利息模式计算。',
+                    items: [
+                        { label: '月利率', value: formatRate(annualRate / 12) },
+                        { label: '日利率', value: formatRate(annualRate / 365) },
+                        { label: '总利息', value: formatMoney(toNumber(values.interestAmount)) },
+                        { label: '本息合计', value: formatMoney(principal + toNumber(values.interestAmount)) },
+                        { label: '总期数', value: `${values.termMonths} 月` }
+                    ]
+                };
+            }
+
+            const annualRate = toNumber(values.annualRate) / 100;
+            const interest = principal * annualRate * years;
+            return {
+                primaryLabel: '推算总利息',
+                primaryValue: formatMoney(interest),
+                summary: '当前使用长线单利总利息模式计算。',
+                items: [
+                    { label: '年利率', value: formatRate(annualRate) },
+                    { label: '月利率', value: formatRate(annualRate / 12) },
+                    { label: '日利率', value: formatRate(annualRate / 365) },
+                    { label: '本息合计', value: formatMoney(principal + interest) },
+                    { label: '总期数', value: `${values.termMonths} 月` }
+                ]
+            };
+        }
+
+        function solveCompoundLongRate(values) {
+            const principal = toNumber(values.principal);
+            const years = toNumber(values.termMonths) / 12;
+            const times = toNumber(values.compoundTimesPerYear);
+            const targetAmount = principal + toNumber(values.interestAmount);
+            const annualRate = solveByBisection((rate) => principal * Math.pow(1 + rate / times, times * years), targetAmount);
+            return {
+                primaryLabel: '推算年利率',
+                primaryValue: formatRate(annualRate),
+                summary: '当前使用长线复利总利息模式，通过数值法反推年利率。',
+                items: [
+                    { label: '月利率', value: formatRate(annualRate / 12) },
+                    { label: '日利率', value: formatRate(annualRate / 365) },
+                    { label: '总利息', value: formatMoney(toNumber(values.interestAmount)) },
+                    { label: '本息合计', value: formatMoney(targetAmount) },
+                    { label: '每年计息次数', value: `${values.compoundTimesPerYear} 次` }
+                ]
+            };
+        }
+
+        function calculateLongCompoundTotal(values) {
+            const principal = toNumber(values.principal);
+            const years = toNumber(values.termMonths) / 12;
+            const times = toNumber(values.compoundTimesPerYear);
+
+            if (state.calcDirection === 'interestFromRate') {
+                const annualRate = toNumber(values.annualRate) / 100;
+                const totalAmount = principal * Math.pow(1 + annualRate / times, times * years);
+                const interest = totalAmount - principal;
+                return {
+                    primaryLabel: '推算总利息',
+                    primaryValue: formatMoney(interest),
+                    summary: '当前使用长线复利总利息模式计算。',
+                    items: [
+                        { label: '本息合计', value: formatMoney(totalAmount) },
+                        { label: '年利率', value: formatRate(annualRate) },
+                        { label: '月利率', value: formatRate(annualRate / 12) },
+                        { label: '日利率', value: formatRate(annualRate / 365) },
+                        { label: '每年计息次数', value: `${values.compoundTimesPerYear} 次` }
+                    ]
+                };
+            }
+
+            return solveCompoundLongRate(values);
+        }
+
+        function calculateEqualInstallment(values) {
+            const principal = toNumber(values.principal);
+            const months = toNumber(values.termMonths);
+
+            if (state.calcDirection === 'interestFromRate') {
+                const monthlyRate = toNumber(values.annualRate) / 100 / 12;
+                const payment = calculateEqualInstallmentPayment(principal, monthlyRate, months);
+                const totalPaid = payment * months;
+                return {
+                    primaryLabel: '推算月供',
+                    primaryValue: formatMoney(payment),
+                    summary: '当前使用等额本息月供模式计算。',
+                    items: [
+                        { label: '总利息', value: formatMoney(totalPaid - principal) },
+                        { label: '总还款', value: formatMoney(totalPaid) },
+                        { label: '年利率', value: formatRate(monthlyRate * 12) },
+                        { label: '月利率', value: formatRate(monthlyRate) },
+                        { label: '期数', value: `${months} 月` }
+                    ]
+                };
+            }
+
+            const targetPayment = toNumber(values.paymentAmount);
+            const monthlyRate = solveByBisection(
+                (rate) => calculateEqualInstallmentPayment(principal, rate, months),
+                targetPayment,
+                0,
+                0.2
+            );
+            return {
+                primaryLabel: '推算年利率',
+                primaryValue: formatRate(monthlyRate * 12),
+                summary: '当前使用等额本息月供模式，通过数值法反推年利率。',
+                items: [
+                    { label: '月利率', value: formatRate(monthlyRate) },
+                    { label: '日利率', value: formatRate((monthlyRate * 12) / 365) },
+                    { label: '月供', value: formatMoney(targetPayment) },
+                    { label: '总还款', value: formatMoney(targetPayment * months) },
+                    { label: '总利息', value: formatMoney(targetPayment * months - principal) }
+                ]
+            };
+        }
+
+        function calculateEqualPrincipal(values) {
+            const principal = toNumber(values.principal);
+            const months = toNumber(values.termMonths);
+            const principalPerMonth = principal / months;
+
+            if (state.calcDirection === 'interestFromRate') {
+                const monthlyRate = toNumber(values.annualRate) / 100 / 12;
+                const totalInterest = calculateEqualPrincipalTotalInterest(principal, monthlyRate, months);
+                return {
+                    primaryLabel: '推算总利息',
+                    primaryValue: formatMoney(totalInterest),
+                    summary: '当前使用等额本金模式计算。',
+                    items: [
+                        { label: '首月月供', value: formatMoney(principalPerMonth + principal * monthlyRate) },
+                        { label: '最后月供', value: formatMoney(principalPerMonth + principalPerMonth * monthlyRate) },
+                        { label: '总还款', value: formatMoney(principal + totalInterest) },
+                        { label: '年利率', value: formatRate(monthlyRate * 12) },
+                        { label: '月利率', value: formatRate(monthlyRate) }
+                    ]
+                };
+            }
+
+            const totalInterest = toNumber(values.interestAmount);
+            const monthlyRate = totalInterest / (principal * (months + 1) / 2);
+            return {
+                primaryLabel: '推算年利率',
+                primaryValue: formatRate(monthlyRate * 12),
+                summary: '当前使用等额本金模式，根据总利息反推年利率。',
+                items: [
+                    { label: '月利率', value: formatRate(monthlyRate) },
+                    { label: '日利率', value: formatRate((monthlyRate * 12) / 365) },
+                    { label: '总利息', value: formatMoney(totalInterest) },
+                    { label: '总还款', value: formatMoney(principal + totalInterest) },
+                    { label: '首月月供', value: formatMoney(principalPerMonth + principal * monthlyRate) }
+                ]
+            };
+        }
+
+        function calculateByMode(values) {
+            if (state.termType === 'short') {
+                return state.interestType === 'simple' ? calculateShortSimple(values) : calculateShortCompound(values);
+            }
+
+            if (state.longMode === 'monthlyPayment') {
+                return state.repaymentType === 'equalInstallment' ? calculateEqualInstallment(values) : calculateEqualPrincipal(values);
+            }
+
+            return state.interestType === 'simple' ? calculateLongSimpleTotal(values) : calculateLongCompoundTotal(values);
+        }
+
+        document.getElementById('modePanel').addEventListener('click', (event) => {
+            const button = event.target.closest('[data-segment]');
+            if (!button) return;
+
+            const { segment, value } = button.dataset;
+            if (state[segment] === value) return;
+
+            state[segment] = value;
+            resetDefaults();
+        });
+
+        document.getElementById('formPanel').addEventListener('input', (event) => {
+            const field = event.target.dataset.field;
+            if (!field) return;
+            formValues[field] = event.target.value;
+            if (field === 'periodUnit') {
+                state.periodUnit = event.target.value;
+                renderForm();
+            }
+        });
+
+        document.getElementById('formPanel').addEventListener('change', (event) => {
+            const field = event.target.dataset.field;
+            if (!field) return;
+            formValues[field] = event.target.value;
+            if (field === 'periodUnit') {
+                state.periodUnit = event.target.value;
+            }
+            renderForm();
+        });
+
+        document.getElementById('calculateBtn').addEventListener('click', () => {
+            clearError();
+
+            try {
+                const values = getInputValues();
+                const message = validateInputs(values);
+                if (message) {
+                    showError(message);
+                    hideResults();
+                    return;
+                }
+
+                const result = calculateByMode(values);
+                renderResults(result);
+            } catch (error) {
+                showError(error.message || '当前输入组合暂时无法计算，请检查输入值是否合理。');
+                hideResults();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            resetDefaults();
+        });
+
+        resetDefaults();
+    </script>
+</body>
+</html>
