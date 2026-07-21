@@ -1,0 +1,265 @@
+/* === 地图编辑器样式 === */
+
+/* 覆盖主页的 overflow:hidden，允许页面滚动 */
+html.editor-page, html.editor-page body {
+    overflow: auto;
+    height: auto;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #0f0c29;
+    color: #e0e0e0;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+#editor-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+/* === 工具栏 === */
+#editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border-bottom: 2px solid #3a3a5c;
+    z-index: 10;
+}
+
+.toolbar-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #f0d78c;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+.toolbar-modes {
+    display: flex;
+    gap: 4px;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.tool-btn {
+    padding: 5px 12px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: #2a2a4a;
+    color: #ccc;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.tool-btn:hover {
+    background: #3a3a5c;
+    border-color: #777;
+}
+
+.tool-btn.active {
+    background: #4a6741;
+    border-color: #8bc34a;
+    color: #fff;
+}
+
+.tool-btn.save {
+    background: #f0d78c;
+    border-color: #f0d78c;
+    color: #1a1a2e;
+    font-weight: bold;
+}
+
+.tool-btn.save:hover {
+    background: #e6c06b;
+}
+
+.tool-btn.clear {
+    border-color: #f44336;
+    color: #f44336;
+}
+
+.tool-btn.back {
+    border-color: #666;
+    color: #888;
+}
+
+/* === 提示信息 === */
+#editor-hint {
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #888;
+    background: rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid #333;
+    text-align: center;
+}
+
+/* === 编辑画布 === */
+#editor-canvas {
+    display: block;
+    width: 100%;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+/* === 游戏配置区域 === */
+#editor-config {
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 2px solid #3a3a5c;
+    overflow-y: auto;
+    max-height: 280px;
+    flex-shrink: 0;
+}
+
+.config-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 8px;
+    border-bottom: 1px solid #2a2a4a;
+    margin-bottom: 6px;
+}
+.config-hint {
+    color: #666;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.config-label {
+    font-size: 13px;
+    color: #ccc;
+    white-space: nowrap;
+}
+
+.config-input {
+    width: 80px;
+    padding: 4px 8px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: #2a2a4a;
+    color: #f0d78c;
+    font-size: 13px;
+    font-family: inherit;
+    text-align: center;
+}
+
+/* 波次配置 */
+.config-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0 6px;
+    font-size: 13px;
+    color: #f0d78c;
+    font-weight: bold;
+}
+
+.tool-btn.small {
+    padding: 3px 8px;
+    font-size: 11px;
+}
+
+.wave-row {
+    background: rgba(42, 42, 74, 0.5);
+    border: 1px solid #3a3a5c;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+}
+
+.wave-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.wave-label {
+    font-size: 12px;
+    color: #f0d78c;
+    font-weight: bold;
+}
+
+.wave-enemy-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.wave-enemy-row select,
+.wave-enemy-row input {
+    padding: 3px 6px;
+    border: 1px solid #555;
+    border-radius: 3px;
+    background: #2a2a4a;
+    color: #ddd;
+    font-size: 12px;
+    font-family: inherit;
+}
+
+.wave-enemy-row select {
+    min-width: 70px;
+}
+
+.wave-enemy-row input {
+    width: 44px;
+    text-align: center;
+    color: #f0d78c;
+}
+
+.btn-remove {
+    background: none;
+    border: 1px solid #f44336;
+    color: #f44336;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-remove:hover {
+    background: rgba(244, 67, 54, 0.15);
+}
+
+.btn-add {
+    padding: 3px 8px;
+    border: 1px solid #4caf50;
+    border-radius: 3px;
+    background: none;
+    color: #4caf50;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 2px;
+}
+
+.btn-add:hover {
+    background: rgba(76, 175, 80, 0.15);
+}

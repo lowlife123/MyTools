@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>文字守卫 - 合成塔防</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 开始界面覆盖层 -->
+    <div id="start-screen">
+        <div class="start-box">
+            <h1 class="start-title">文字守卫</h1>
+            <p class="start-subtitle">合成塔防 · 守卫文字</p>
+            <div class="start-actions">
+                <button class="start-btn primary" id="btn-start-game">开始游戏</button>
+                <button class="start-btn secondary" id="btn-map-editor">地图编辑</button>
+                <button class="start-btn secondary" id="btn-config-editor">功能配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主游戏容器 -->
+    <div id="game-container">
+        <!-- 游戏内返回主页按钮 -->
+        <div id="game-back-btn" title="返回主页">← 返回主页</div>
+
+        <!-- 顶部HUD栏 -->
+        <div id="hud-bar">
+            <div class="hud-item" id="ink-display">
+                <span class="hud-icon">🖋️</span>
+                <span id="ink-amount">100</span>
+            </div>
+            <div class="hud-item" id="word-hp-display">
+                <span class="hud-icon">❤️</span>
+                <span id="word-hp">3</span>/<span id="word-maxhp">3</span>
+            </div>
+            <div class="hud-item" id="wave-display">
+                波次: <span id="wave-num">1</span>/<span id="wave-max">5</span>
+            </div>
+            <div class="hud-item" id="countdown-display">
+                ⏱️ <span id="countdown-timer">3</span>秒
+            </div>
+            <div class="hud-item" id="enemy-count-display">
+                敌人: <span id="enemy-count">0</span>
+            </div>
+        </div>
+
+        <!-- 主棋盘画布 -->
+        <canvas id="board-canvas"></canvas>
+
+        <!-- 征兵栏：不参与战斗的副棋盘，可与主棋盘双向换位 -->
+        <div id="recruit-bar">
+            <div class="recruit-head">
+                <span class="recruit-label">征兵副棋盘</span>
+                <span class="recruit-tip">点击征兵会整栏刷新，可与主棋盘互换</span>
+            </div>
+            <div id="recruit-slots">
+                <!-- 固定槽位由 UIManager 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 操作栏 -->
+        <div id="action-bar">
+            <button class="action-btn" id="btn-gacha" title="征兵(消耗墨水抽卡)">
+                🎴征兵<br><small>(10墨水)</small>
+            </button>
+        </div>
+
+        <!-- 征兵面板(弹窗) -->
+        <div id="gacha-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2>征兵 - 消耗 <span id="gacha-cost">10</span> 墨水</h2>
+                <button class="close-btn" id="btn-close-gacha">✕</button>
+            </div>
+            <div class="gacha-result" id="gacha-result">
+                <!-- 抽卡结果显示区域 -->
+            </div>
+            <button class="primary-btn" id="btn-draw">抽卡 (10墨水)</button>
+        </div>
+
+        <!-- 单位信息面板(点击单位显示) -->
+        <div id="unit-info-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2 id="unit-info-name">单位名称</h2>
+                <button class="close-btn" id="btn-close-unit-info">✕</button>
+            </div>
+            <div id="unit-info-content">
+                <!-- 单位详情 -->
+            </div>
+            <div class="unit-actions" id="unit-actions">
+                <!-- 操作按钮：出售、合并等 -->
+            </div>
+        </div>
+
+        <!-- 道具面板 -->
+        <div id="item-panel" class="panel hidden">
+            <div class="panel-header">
+                <h2>道具背包</h2>
+                <button class="close-btn" id="btn-close-item">✕</button>
+            </div>
+            <div id="item-list">
+                <!-- 道具列表 -->
+            </div>
+        </div>
+
+        <!-- 游戏结果弹窗 -->
+        <div id="result-overlay" class="overlay hidden">
+            <div class="result-box">
+                <h1 id="result-title">胜利!</h1>
+                <p id="result-info">你成功守卫了文字!</p>
+                <button class="primary-btn" id="btn-restart">再来一局</button>
+            </div>
+        </div>
+
+        <!-- 合成拖拽提示 -->
+        <div id="drag-indicator" class="hidden"></div>
+    </div>
+
+    <!-- 脚本加载顺序：基础 → 游戏逻辑 → 系统 → UI → 主入口 -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/eventBus.js"></script>
+    <script src="js/game/Tile.js"></script>
+    <script src="js/game/Path.js"></script>
+    <script src="js/game/Board.js"></script>
+    <script src="js/units/Unit.js"></script>
+    <script src="js/units/Soldier.js"></script>
+    <script src="js/units/Beast.js"></script>
+    <script src="js/units/Enemy.js"></script>
+    <script src="js/systems/EconomySystem.js"></script>
+    <script src="js/systems/GachaSystem.js"></script>
+    <script src="js/systems/MergeSystem.js"></script>
+    <script src="js/systems/BattleSystem.js"></script>
+    <script src="js/systems/ItemSystem.js"></script>
+    <script src="js/ui/UIManager.js"></script>
+    <script src="js/game/GameManager.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

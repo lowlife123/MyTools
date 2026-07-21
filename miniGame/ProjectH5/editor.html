@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="editor-page">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>地图编辑 - 文字守卫</title>
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="editor-container">
+        <!-- 顶部工具栏 -->
+        <div id="editor-toolbar">
+            <span class="toolbar-title">地图编辑器</span>
+            <div class="toolbar-modes">
+                <button class="tool-btn active" data-mode="path" id="btn-mode-path">路径模式</button>
+                <button class="tool-btn" data-mode="initTile" id="btn-mode-init-tile">初始地块</button>
+            </div>
+            <div class="toolbar-actions">
+                <button class="tool-btn clear" id="btn-clear">清空</button>
+                <button class="tool-btn save" id="btn-save">保存地图</button>
+            </div>
+        </div>
+
+        <!-- 提示信息 -->
+        <div id="editor-hint">点击格子设置路径点，按顺序自动连线</div>
+
+        <!-- 编辑画布 -->
+        <canvas id="editor-canvas"></canvas>
+
+        <!-- 游戏配置区域 -->
+        <div id="editor-config">
+            <!-- 初始墨水 -->
+            <div class="config-row">
+                <label class="config-label">初始墨水：</label>
+                <input type="number" id="config-ink" class="config-input" min="0" step="50" value="1000">
+            </div>
+
+            <!-- 字血量 -->
+            <div class="config-row">
+                <label class="config-label">「字」血量：</label>
+                <input type="number" id="config-word-hp" class="config-input" min="1" step="1" value="3">
+            </div>
+
+            <!-- 出怪间隔 -->
+            <div class="config-row">
+                <label class="config-label">出怪间隔(秒)：</label>
+                <input type="number" id="config-spawn-interval" class="config-input" min="0.1" step="0.1" value="1.5">
+            </div>
+
+            <!-- 征兵槽位数量 -->
+            <div class="config-row">
+                <label class="config-label">征兵槽位数：</label>
+                <input type="number" id="gacha-slot-count" class="config-input" min="1" step="1" value="6">
+            </div>
+
+            <!-- 异兽字概率 -->
+            <div class="config-row">
+                <label class="config-label">异兽字概率：</label>
+                <input type="number" id="gacha-beast-chance" class="config-input" min="0" max="1" step="0.05" value="0.15">
+            </div>
+
+            <!-- 异兽字保底 -->
+            <div class="config-row">
+                <label class="config-label">异兽字保底：</label>
+                <input type="number" id="gacha-beast-pity" class="config-input" min="1" step="1" value="20">
+                <span class="config-hint">次不出后强制出</span>
+            </div>
+
+            <!-- 铲子概率 -->
+            <div class="config-row">
+                <label class="config-label">铲子概率：</label>
+                <input type="number" id="gacha-shovel-chance" class="config-input" min="0" max="1" step="0.05" value="0.3">
+            </div>
+
+            <!-- 铲子保底 -->
+            <div class="config-row">
+                <label class="config-label">铲子保底：</label>
+                <input type="number" id="gacha-shovel-pity" class="config-input" min="1" step="1" value="3">
+                <span class="config-hint">次征兵不出后强制出</span>
+            </div>
+
+            <!-- 波次配置 -->
+            <div class="config-section-title">
+                <span>波次配置</span>
+                <button class="tool-btn small" id="btn-add-wave">+ 添加波次</button>
+            </div>
+            <div id="waves-container">
+                <!-- 动态生成波次行 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/editor/MapEditor.js"></script>
+    <script src="js/common/BackButton.js"></script>
+</body>
+</html>

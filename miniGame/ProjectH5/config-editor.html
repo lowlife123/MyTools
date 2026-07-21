@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="config-page">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>功能配置 - 文字守卫</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/config-editor.css">
+</head>
+<body>
+    <div id="config-editor-container">
+        <!-- Tab 切换栏 -->
+        <div id="config-tabs">
+            <button class="config-tab active" data-tab="enemy">敌方单位</button>
+            <button class="config-tab" data-tab="soldier">小兵棋子</button>
+            <button class="config-tab" data-tab="beast">异兽棋子</button>
+            <button class="config-tab" data-tab="level">等级配置</button>
+        </div>
+
+        <!-- 操作栏 -->
+        <div id="config-toolbar">
+            <button class="tool-btn save" id="btn-save-config">保存配置</button>
+            <button class="tool-btn reset" id="btn-reset-config">恢复默认</button>
+        </div>
+
+        <!-- 敌方单位配置面板 -->
+        <div id="panel-enemy" class="config-panel active">
+            <h3 class="panel-title">敌方单位配置</h3>
+            <div id="enemy-fields">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 小兵棋子配置面板 -->
+        <div id="panel-soldier" class="config-panel">
+            <h3 class="panel-title">小兵棋子配置</h3>
+            <div id="soldier-fields">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 异兽棋子配置面板 -->
+        <div id="panel-beast" class="config-panel">
+            <h3 class="panel-title">异兽棋子配置</h3>
+            <div id="beast-fields">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 等级配置面板 -->
+        <div id="panel-level" class="config-panel">
+            <h3 class="panel-title">等级系数与异兽升级配置</h3>
+            <div id="level-fields">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/editor/ConfigEditor.js"></script>
+    <script src="js/common/BackButton.js"></script>
+</body>
+</html>
